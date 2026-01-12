@@ -1,0 +1,9 @@
+{
+  "common": {
+  },
+  "reservation": {
+    "reservationHistory": "Storico Prenotazioni",
+     "text": "Qui potrai prenotare le tue visite mediche",
+     "noReservation": "Non ci sono appuntamenti prenotati"
+  }
+}
