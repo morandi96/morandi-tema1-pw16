@@ -1,4 +1,3 @@
-import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import Reservation from '@/views/Reservation.vue';
 import Cancellation from '@/views/Cancellation.vue';
@@ -10,7 +9,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: HomeView
+      component: Reservation
     },
     {
       path: '/login',

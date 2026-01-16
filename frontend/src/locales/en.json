@@ -1,0 +1,51 @@
+{
+  "reservation": {
+    "reservationHistory": "Storico Prenotazioni",
+    "text": "Qui potrai prenotare le tue visite mediche",
+    "noReservation": "Non ci sono appuntamenti prenotati",
+    "activeReservation": "Prenotazione Attiva",
+    "address": "Indirizzo",
+    "reason": "Causale",
+    "loading": "Caricamento prenotazione attiva...",
+    "error": " Errore nel caricamento della prenotazione attiva",
+    "reserve": "Non ci sono appuntamenti prenotati",
+    "date": "Appuntamenti passati",
+    "load_history": "Caricamento storico...",
+    "history_error": "Errore nel caricamento dello storico prenotazioni",
+    "new_reservation": {
+      "title": "Nuova Prenotazione",
+      "doctor_label": "Seleziona Medico",
+      "doctor_required": "Seleziona un medico",
+      "doctor_empty": "Nessun medico disponibile",
+      "category_label": "Categoria Visita",
+      "category_required": "Seleziona una categoria",
+      "category_empty": "Nessuna categoria disponibile",
+      "available_dates_label": "Date Disponibili",
+      "date_required": "Seleziona una data",
+      "date_empty": "Nessuna data disponibile",
+      "time_label": "Orario",
+      "time_required": "Seleziona un orario",
+      "time_empty": "Nessun orario disponibile",
+      "summary_title": "Riepilogo Prenotazione",
+      "summary_doctor": "Medico:",
+      "summary_category": "Categoria:",
+      "summary_date": "Data:",
+      "summary_time": "Orario:",
+      "cancel_button": "Annulla",
+      "confirm_button": "Conferma Prenotazione",
+      "submitting": "Prenotando...",
+      "success": "Prenotazione creata con successo",
+      "error": "Errore durante la creazione della prenotazione"
+    },
+    "categories": {
+      "general_checkup": "Controllo generale",
+      "bone_problems": "Problemi ossei",
+      "respiratory_problems": "Problemi respiratori",
+      "cardiology_checkup": "Controllo cardiologico",
+      "dermatology_problems": "Problemi dermatologici",
+      "ophthalmology_checkup": "Controllo oculistico",
+      "gynecology_checkup": "Controllo ginecologico",
+      "gastrointestinal_problems": "Problemi gastrointestinali"
+    }
+  }
+}

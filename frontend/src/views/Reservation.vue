@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import Table from '@/components/shared/organisms/Table.vue';
 import ActiveReservation from '@/components/core/reservation/ActiveReservation.vue';
+import NewReservation from '@/components/core/reservation/NewReservation.vue';
 import { RESERVATION_STATUS_COLORS, type ReservationStatusType } from '@/constants/common';
 import type { QTableProps } from 'quasar';
 import { useActiveReservation, useReservationsList } from '@/stores/async/reservation';
@@ -19,6 +20,8 @@ const {
   isLoading: isLoadingList,
   isError: isErrorList
 } = useReservationsList();
+
+const newReservationDialog = ref(false);
 
 // Computed per gestire i dati della tabella
 const tableData = computed(() => pastReservations.value || []);
@@ -72,6 +75,7 @@ const getStatusColor = (status: ReservationStatusType) => {
 // Funzioni azioni
 const newReservation = () => {
   console.log('Nuova prenotazione');
+  newReservationDialog.value = true;
   // TODO: Implementare form nuova prenotazione
 };
 </script>
@@ -83,7 +87,7 @@ const newReservation = () => {
       <q-card class="shadow-3">
         <q-card-section class="text-center q-pa-xl">
           <q-spinner color="primary" size="50px" />
-          <div class="text-subtitle2 text-grey-7 q-mt-md">Caricamento prenotazione attiva...</div>
+          <div class="text-subtitle2 text-grey-7 q-mt-md">{{ $t('reservation.loading') }}</div>
         </q-card-section>
       </q-card>
     </div>
@@ -94,7 +98,7 @@ const newReservation = () => {
         <template #avatar>
           <q-icon name="error" color="white" />
         </template>
-        Errore nel caricamento della prenotazione attiva
+        {{ $t('reservation.error') }}
       </q-banner>
     </div>
 
@@ -104,11 +108,11 @@ const newReservation = () => {
     </div>
 
     <!-- Messaggio se non ci sono prenotazioni attive -->
-    <div v-else class="text-center q-pa-xl q-mb-xl">
+    <div v-else class="text-center q-pb-lg">
       <q-card class="shadow-1">
         <q-card-section>
           <q-icon name="event_available" size="64px" color="grey-5" />
-          <div class="text-h6 text-grey-7 q-mt-md">Non ci sono appuntamenti prenotati</div>
+          <div class="text-h6 text-grey-7 q-mt-md">{{ $t('reservation.reserve') }}</div>
           <q-btn
             unelevated
             color="primary"
@@ -120,22 +124,20 @@ const newReservation = () => {
         </q-card-section>
       </q-card>
     </div>
+    <NewReservation v-model:model="newReservationDialog" />
 
     <!-- Sezione Storico -->
     <div>
-      <div class="text-h5 text-weight-bold q-mb-md">Appuntamenti passati</div>
+      <div class="text-h6 text-weight-bold q-mb-md">{{ $t('reservation.date') }}</div>
 
       <q-card>
-        <q-card-section>
-          <div class="text-h6 text-weight-bold q-mb-md">
-            <q-icon name="event" color="primary" class="q-mr-sm" />
-            {{ $t('reservation.activeReservation') }}
-          </div>
-
+        <q-card-section class="pa-0">
           <!-- Loading Lista -->
           <div v-if="isLoadingList" class="text-center q-pa-xl">
             <q-spinner color="primary" size="40px" />
-            <div class="text-subtitle2 text-grey-7 q-mt-md">Caricamento storico...</div>
+            <div class="text-subtitle2 text-grey-7 q-mt-md">
+              {{ $t('reservation.load_history') }}
+            </div>
           </div>
 
           <!-- Errore Lista -->
@@ -143,11 +145,11 @@ const newReservation = () => {
             <template #avatar>
               <q-icon name="error" color="white" />
             </template>
-            Errore nel caricamento dello storico prenotazioni
+            {{ $t('reservation.history_error') }}
           </q-banner>
 
           <!-- Tabella -->
-          <Table v-else :headers="columns" :data="tableData" :slot-names="['status']">
+          <Table v-else :headers="columns" :data="tableData" :slot-names="['status']" flat>
             <!-- Slot per lo stato con badge colorato -->
             <template #status="{ rowItem }">
               <q-td :props="rowItem" class="text-center">

@@ -30,6 +30,11 @@ const props = withDefaults(
   }
 );
 
+// eslint-disable-next-line no-undef
+const emit = defineEmits<{
+  'close-dialog': [];
+}>();
+
 const dialogModel = ref(false);
 
 const { model } = toRefs(props);
@@ -37,6 +42,10 @@ const { model } = toRefs(props);
 watch(model, (value): void => {
   dialogModel.value = value;
 });
+
+const handleHide = () => {
+  emit('close-dialog');
+};
 </script>
 
 <template>
@@ -46,7 +55,7 @@ watch(model, (value): void => {
     :class="dialogClass"
     :persistent="persistent"
     :position="position"
-    @hide="$emit('close-dialog')"
+    @hide="handleHide"
   >
     <Card
       :style="`min-width: ${cardMinWidth}; min-height: ${cardMinHeight}`"
