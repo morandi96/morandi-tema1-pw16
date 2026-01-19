@@ -1,4 +1,14 @@
 {
+  "common": {
+    "project": "Studio Medico Morandi"
+  },
+  "layout": {
+    "no_data": "Nessuna prenotazione disponibile"
+  },
+  "login": {
+    "verify": "Verifica accesso...",
+    "title": "Accedi o registrati per gestire le tue prenotazioni"
+  },
   "reservation": {
     "reservationHistory": "Storico Prenotazioni",
     "text": "Qui potrai prenotare le tue visite mediche",
@@ -46,6 +56,18 @@
       "ophthalmology_checkup": "Controllo oculistico",
       "gynecology_checkup": "Controllo ginecologico",
       "gastrointestinal_problems": "Problemi gastrointestinali"
+    }
+  },
+  "toast": {
+    "reservation": {
+      "create": {
+        "success": "Prenotazione creata con successo",
+        "error": "Errore durante la creazione della prenotazione"
+      },
+      "cancel": {
+        "success": "Prenotazione cancellata con successo",
+        "error": "Errore durante la cancellazione della prenotazione"
+      }
     }
   }
 }

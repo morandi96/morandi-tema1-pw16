@@ -2,7 +2,7 @@ import type { ReservationStatusType } from '@/constants/common';
 
 // Interfaccia per le prenotazioni
 export interface Reservation {
-  id: number;
+  id: string;
   date: string;
   time: string;
   category: string;

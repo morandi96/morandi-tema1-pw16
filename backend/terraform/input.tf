@@ -47,3 +47,16 @@ variable "logout_urls" {
   description = "URL di logout per OAuth"
   default     = ["http://localhost:5173"]
 }
+
+# Billing Alarm
+# variable "alert_email" {
+#   type        = string
+#   description = "Email per ricevere gli allarmi di billing"
+#   default     = "morandi.christian96w@gmail.com"
+# }
+
+# variable "billing_threshold" {
+#   type        = number
+#   description = "Soglia di costo in USD per l'allarme"
+#   default     = 1.0
+# }

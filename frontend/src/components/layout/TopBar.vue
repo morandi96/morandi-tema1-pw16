@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
 
 const router = useRouter();
 const route = useRoute();
+const { user, logout } = useAuth();
 
 // Tab attivo - sincronizzato con la rotta corrente
 const activeTab = ref('prenotazioni');
@@ -46,14 +48,38 @@ watch(activeTab, (newTab) => {
         <div class="row items-center">
           <q-icon name="local_hospital" size="md" class="q-mr-sm" />
           <div style="line-height: 1.1">
-            <div class="text-h6" style="margin-bottom: -4px">Studio Medico</div>
-            <div class="text-subtitle1">Dottor Morandi</div>
+            <div class="text-h6" style="margin-bottom: -4px">Studio Medico Morandi</div>
           </div>
         </div>
       </q-toolbar-title>
 
-      <!-- Icone utente/ricerca -->
-      <q-btn flat round dense icon="account_circle" size="lg" />
+      <!-- Menu utente -->
+      <q-btn flat round dense icon="account_circle" size="lg">
+        <q-menu>
+          <q-list style="min-width: 200px">
+            <!-- Info utente -->
+            <q-item>
+              <q-item-section>
+                <q-item-label class="text-weight-medium">
+                  {{ user?.signInDetails?.loginId || 'Utente' }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-separator />
+
+            <!-- Azione logout -->
+            <q-item clickable @click="logout">
+              <q-item-section avatar>
+                <q-icon name="logout" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Esci</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-btn>
     </q-toolbar>
 
     <!-- Barra di navigazione secondaria -->

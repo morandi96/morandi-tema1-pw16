@@ -1,50 +1,29 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import Dialog from '@/components/shared/organisms/Dialog.vue';
 import { useCreateReservation } from '@/stores/async/reservation';
-import { ReservationStatus } from '@/constants/common';
+import { AVAILABLE_TIMES, DOCTORS, ReservationStatus } from '@/constants/common';
 import type { Reservation } from '@/types/types';
+import { generateRandomBlockedDates } from '@/utils/common';
 
-// eslint-disable-next-line no-undef
+// Props
 const props = withDefaults(
   defineProps<{
     model: boolean;
-    availableDates?: string[];
-    blockedDates?: string[];
-    doctors?: string[];
   }>(),
-  {
-    availableDates: () => [],
-    blockedDates: () => [
-      // Esempio date bloccate (weekend e alcune date specifiche)
-      '2026/01/18', // Sabato
-      '2026/01/19', // Domenica
-      '2026/01/25', // Sabato
-      '2026/01/26', // Domenica
-      '2026/01/22', // Mercoledì - Medico in ferie
-      '2026/01/23', // Giovedì - Studio chiuso
-      '2026/02/01', // Sabato
-      '2026/02/02' // Domenica
-    ],
-    doctors: () => [
-      'Dr. Mario Rossi',
-      'Dr. Anna Verdi',
-      'Dr. Luigi Bianchi',
-      'Dr. Sara Neri',
-      'Dr. Paolo Ferrari'
-    ]
-  }
+  {}
 );
 
-// eslint-disable-next-line no-undef
+// Emits
 const emit = defineEmits<{
   'update:model': [value: boolean];
 }>();
 
 const { t } = useI18n();
+const $q = useQuasar();
 
-// Form data
 const formData = ref({
   doctor: '',
   category: '',
@@ -52,43 +31,22 @@ const formData = ref({
   time: ''
 });
 
-// State per il datepicker
 const showDatePicker = ref(false);
+const blockedDates = ref<string[]>([]);
 
-// Funzione per verificare se una data è bloccata (formato YYYY/MM/DD per QDate)
+// Verifica se una data è bloccata (weekend o nelle date bloccate)
 const isDateBlocked = (date: string): boolean => {
-  // date è nel formato 'YYYY/MM/DD' dal QDate
-  const dateString = date.replace(/\//g, '-'); // Converti in YYYY-MM-DD
-
-  // Verifica se la data è nei blocked dates
-  if (props.blockedDates.includes(date)) {
+  if (blockedDates.value.includes(date)) {
     return true;
   }
 
-  // Se sono definite availableDates, controlla che la data sia disponibile
-  if (props.availableDates.length > 0) {
-    return !props.availableDates.includes(dateString);
-  }
-
-  // Altrimenti blocca solo i weekend (se non specificato diversamente)
-  const dateObj = new Date(dateString);
+  // Verifica se è weekend
+  const dateObj = new Date(date.replace(/\//g, '-'));
   const dayOfWeek = dateObj.getDay();
-  return dayOfWeek === 0 || dayOfWeek === 6; // Domenica = 0, Sabato = 6
+  return dayOfWeek === 0 || dayOfWeek === 6;
 };
 
-// Funzione per convertire da formato QDate (YYYY/MM/DD) a ISO string (YYYY-MM-DD)
-const convertQDateToISO = (qDateString: string): string => {
-  if (!qDateString) return '';
-  return qDateString.replace(/\//g, '-');
-};
-
-// Funzione per convertire da ISO (YYYY-MM-DD) a formato QDate (YYYY/MM/DD)
-const convertISOToQDate = (isoString: string): string => {
-  if (!isoString) return '';
-  return isoString.replace(/-/g, '/');
-};
-
-// Computed per la data formattata per il display
+// Computed per la data formattata in italiano
 const selectedDateFormatted = computed(() => {
   if (!formData.value.date) return '';
   const date = new Date(formData.value.date);
@@ -99,41 +57,6 @@ const selectedDateFormatted = computed(() => {
     year: 'numeric'
   });
 });
-
-// Gestione selezione data dal datepicker
-const handleDateSelection = (date: string) => {
-  formData.value.date = convertQDateToISO(date);
-  showDatePicker.value = false;
-};
-
-// Computed per il valore del QDate
-const qDateValue = computed({
-  get: () => convertISOToQDate(formData.value.date),
-  set: (value: string) => {
-    formData.value.date = convertQDateToISO(value);
-  }
-});
-
-// Orari disponibili
-const availableTimes = [
-  '08:00',
-  '08:30',
-  '09:00',
-  '09:30',
-  '10:00',
-  '10:30',
-  '11:00',
-  '11:30',
-  '14:00',
-  '14:30',
-  '15:00',
-  '15:30',
-  '16:00',
-  '16:30',
-  '17:00',
-  '17:30',
-  '18:00'
-];
 
 // Computed per le categorie traducibili
 const RESERVATION_CATEGORIES = computed(() => [
@@ -160,8 +83,13 @@ const isFormValid = computed(() => {
 // Mutation per creare prenotazione
 const { mutate: createReservation, isPending: isSubmitting } = useCreateReservation();
 
+const handleDateSelection = (date: string) => {
+  // Converti da YYYY/MM/DD a YYYY-MM-DD
+  formData.value.date = date.replace(/\//g, '-');
+  showDatePicker.value = false;
+};
+
 const handleCloseDialog = () => {
-  // Reset form quando si chiude
   formData.value = {
     doctor: '',
     category: '',
@@ -174,7 +102,6 @@ const handleCloseDialog = () => {
 const handleSubmit = () => {
   if (!isFormValid.value) return;
 
-  // Trova la label della categoria selezionata per salvarla nella prenotazione
   const selectedCategory = RESERVATION_CATEGORIES.value.find(
     (cat) => cat.value === formData.value.category
   );
@@ -183,24 +110,37 @@ const handleSubmit = () => {
   const newReservation: Omit<Reservation, 'id'> = {
     date: formData.value.date,
     time: formData.value.time,
-    category: categoryLabel, // Salviamo la label tradotta invece del valore
+    category: categoryLabel,
     doctor: formData.value.doctor,
     status: ReservationStatus.IN_ATTESA
   };
 
   createReservation(newReservation, {
     onSuccess: () => {
-      // TODO: Aggiungere notifica toast di successo
-      console.log(t('reservation.new_reservation.success'));
+      $q.notify({
+        type: 'positive',
+        message: t('toast.reservation.create.success'),
+        position: 'top'
+      });
       handleCloseDialog();
     },
     onError: (error) => {
-      // TODO: Aggiungere notifica toast di errore
-      console.error(t('reservation.new_reservation.error'), error);
+      console.error('Errore durante la creazione:', error);
+      $q.notify({
+        type: 'negative',
+        message: t('toast.reservation.create.error'),
+        position: 'top'
+      });
     }
   });
 };
+
+// Inizializza le date bloccate al mount
+onMounted(() => {
+  blockedDates.value = generateRandomBlockedDates(4);
+});
 </script>
+
 <template>
   <Dialog
     :model="props.model"
@@ -222,7 +162,7 @@ const handleSubmit = () => {
           <div class="col-12 col-md-6">
             <q-select
               v-model="formData.doctor"
-              :options="props.doctors"
+              :options="DOCTORS"
               :label="t('reservation.new_reservation.doctor_label')"
               filled
               emit-value
@@ -280,7 +220,7 @@ const handleSubmit = () => {
               lazy-rules
               @click="showDatePicker = true"
               class="cursor-pointer"
-              :placeholder="formData.date ? '' : 'Clicca per selezionare una data'"
+              placeholder="Clicca per selezionare una data"
             >
               <template #prepend>
                 <q-icon name="calendar_today" />
@@ -289,55 +229,67 @@ const handleSubmit = () => {
                 <q-icon name="arrow_drop_down" />
               </template>
 
-              <!-- QDate Popup -->
               <q-popup-proxy
                 v-model="showDatePicker"
                 transition-show="scale"
                 transition-hide="scale"
               >
-                <q-card class="q-pa-none">
-                  <q-card-section class="q-pa-none">
-                    <q-date
-                      v-model="qDateValue"
-                      mask="YYYY/MM/DD"
-                      :locale="{
-                        days: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
-                        months: [
-                          'Gen',
-                          'Feb',
-                          'Mar',
-                          'Apr',
-                          'Mag',
-                          'Giu',
-                          'Lug',
-                          'Ago',
-                          'Set',
-                          'Ott',
-                          'Nov',
-                          'Dic'
-                        ]
-                      }"
-                      :options="(date) => !isDateBlocked(date)"
-                      today-btn
-                      @update:model-value="handleDateSelection"
-                      color="primary"
-                      class="shadow-4 q-pa-0"
-                    >
-                      <div class="row items-center justify-between">
-                        <div class="text-caption text-grey-6">
-                          <q-icon name="info" size="16px" class="q-mr-xs" />
-                          Le date in grigio non sono disponibili
-                        </div>
-                        <q-btn
-                          label="Chiudi"
-                          flat
-                          size="sm"
-                          @click="showDatePicker = false"
-                          color="primary"
-                        />
+                <q-card>
+                  <q-date
+                    :model-value="formData.date.replace(/-/g, '/')"
+                    @update:model-value="handleDateSelection"
+                    mask="YYYY/MM/DD"
+                    :locale="{
+                      days: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
+                      daysShort: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
+                      months: [
+                        'Gennaio',
+                        'Febbraio',
+                        'Marzo',
+                        'Aprile',
+                        'Maggio',
+                        'Giugno',
+                        'Luglio',
+                        'Agosto',
+                        'Settembre',
+                        'Ottobre',
+                        'Novembre',
+                        'Dicembre'
+                      ],
+                      monthsShort: [
+                        'Gen',
+                        'Feb',
+                        'Mar',
+                        'Apr',
+                        'Mag',
+                        'Giu',
+                        'Lug',
+                        'Ago',
+                        'Set',
+                        'Ott',
+                        'Nov',
+                        'Dic'
+                      ]
+                    }"
+                    :options="(date) => !isDateBlocked(date)"
+                    today-btn
+                    color="primary"
+                    class="shadow-4"
+                  >
+                    <div class="row items-center justify-between q-pa-sm">
+                      <div class="text-caption text-grey-6">
+                        <q-icon name="info" size="16px" class="q-mr-xs" />
+                        Le date in grigio non sono disponibili
                       </div>
-                    </q-date>
-                  </q-card-section>
+                      <q-btn
+                        label="Chiudi"
+                        flat
+                        size="sm"
+                        @click="showDatePicker = false"
+                        color="primary"
+                      />
+                    </div>
+                  </q-date>
                 </q-card>
               </q-popup-proxy>
             </q-input>
@@ -346,7 +298,7 @@ const handleSubmit = () => {
           <div class="col-12 col-md-6">
             <q-select
               v-model="formData.time"
-              :options="availableTimes"
+              :options="AVAILABLE_TIMES"
               :label="t('reservation.new_reservation.time_label')"
               filled
               emit-value

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import { get, post } from 'aws-amplify/api';
+import { get, post, del } from 'aws-amplify/api';
 import { API_NAME, idToken, queryCommons } from './common';
 import type { Reservation } from '@/types/types';
 
@@ -77,16 +77,16 @@ export const useReservationsList = () => {
 
 /**
  * Hook per annullare una prenotazione
- * POST /reservation/cancel/:id
+ * DELETE /reservation/cancel/:id
  */
 export const useCancelReservation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (reservationId: number) => {
+    mutationFn: async (reservationId: string) => {
 
       // Chiamata API reale con AWS Amplify
-      const restOperation = post({
+      const restOperation = del({
         apiName: API_NAME,
         path: `${basePath}/cancel/${reservationId}`,
         options: {

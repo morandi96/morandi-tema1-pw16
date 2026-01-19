@@ -1,0 +1,392 @@
+openapi: "3.0.1"
+info:
+  title: "Studio Medico Morandi - Reservation API"
+  description: "API per la gestione delle prenotazioni"
+  version: "v1"
+
+paths:
+  /reservation/create:
+    options:
+      summary: "CORS preflight"
+      responses:
+        "200":
+          description: "CORS headers"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "{}"
+    post:
+      summary: "Crea una nuova prenotazione"
+      operationId: "createReservation"
+      security:
+        - CognitoAuthorizer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReservationRequest"
+      responses:
+        "201":
+          description: "Prenotazione creata con successo"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "400":
+          description: "Richiesta non valida"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "Non autorizzato"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-amazon-apigateway-request-validator: "validate-body"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_create_arn}/invocations"
+        passthroughBehavior: "when_no_match"
+
+  /reservation/list:
+    options:
+      summary: "CORS preflight"
+      responses:
+        "200":
+          description: "CORS headers"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "{}"
+    get:
+      summary: "Lista prenotazioni"
+      description: "Recupera la lista delle prenotazioni. Senza parametri ritorna le prenotazioni dell'utente autenticato."
+      operationId: "listReservations"
+      security:
+        - CognitoAuthorizer: []
+      parameters:
+        - name: "userId"
+          in: "query"
+          description: "ID utente Cognito (sub) per filtrare. Se omesso usa l'utente autenticato."
+          required: false
+          schema:
+            type: "string"
+        - name: "status"
+          in: "query"
+          description: "Filtra per status (active, cancelled, completed)"
+          required: false
+          schema:
+            type: "string"
+            enum: ["active", "cancelled", "completed"]
+        - name: "date"
+          in: "query"
+          description: "Filtra per data (YYYY-MM-DD)"
+          required: false
+          schema:
+            type: "string"
+            format: "date"
+      responses:
+        "200":
+          description: "Lista prenotazioni"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Reservation"
+        "401":
+          description: "Non autorizzato"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-amazon-apigateway-request-validator: "validate-params"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_list_arn}/invocations"
+        passthroughBehavior: "when_no_match"
+
+  /reservation/active:
+    options:
+      summary: "CORS preflight"
+      responses:
+        "200":
+          description: "CORS headers"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "{}"
+    get:
+      summary: "Recupera la prenotazione attiva"
+      description: "Ritorna la prenotazione con stato 'In attesa di conferma' o 'Confermata' dell'utente autenticato. Ritorna null se non esiste."
+      operationId: "getActiveReservation"
+      security:
+        - CognitoAuthorizer: []
+      responses:
+        "200":
+          description: "Prenotazione attiva o null"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationOrNull"
+        "401":
+          description: "Non autorizzato"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_active_arn}/invocations"
+        passthroughBehavior: "when_no_match"
+
+  /reservation/cancel/{id}:
+    options:
+      summary: "CORS preflight"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "CORS headers"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "{}"
+    delete:
+      summary: "Cancella una prenotazione"
+      description: "Elimina definitivamente la prenotazione specificata se appartiene all'utente autenticato"
+      operationId: "cancelReservation"
+      security:
+        - CognitoAuthorizer: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "ID della prenotazione da cancellare"
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Prenotazione cancellata con successo"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  reservationId:
+                    type: "string"
+        "401":
+          description: "Non autorizzato"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Prenotazione non trovata"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-amazon-apigateway-request-validator: "validate-params"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_cancel_arn}/invocations"
+        passthroughBehavior: "when_no_match"
+
+components:
+  schemas:
+    CreateReservationRequest:
+      type: "object"
+      required:
+        - date
+        - time
+        - category
+        - doctor
+      properties:
+        date:
+          type: "string"
+          format: "date"
+          description: "Data prenotazione (YYYY-MM-DD)"
+        time:
+          type: "string"
+          description: "Ora prenotazione (HH:mm)"
+        category:
+          type: "string"
+          description: "Categoria visita"
+        doctor:
+          type: "string"
+          description: "Nome dottore"
+        location:
+          type: "string"
+          description: "Sede (opzionale)"
+
+    Reservation:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          description: "ID univoco prenotazione"
+        userId:
+          type: "string"
+          description: "ID utente Cognito (sub)"
+        date:
+          type: "string"
+          format: "date"
+        time:
+          type: "string"
+        category:
+          type: "string"
+        doctor:
+          type: "string"
+        status:
+          type: "string"
+          enum: ["active", "cancelled", "completed"]
+        location:
+          type: "string"
+        createdAt:
+          type: "string"
+          format: "date-time"
+
+    ErrorResponse:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+        code:
+          type: "string"
+
+    ReservationOrNull:
+      type: "object"
+      nullable: true
+      properties:
+        id:
+          type: "string"
+        userId:
+          type: "string"
+        date:
+          type: "string"
+          format: "date"
+        time:
+          type: "string"
+        category:
+          type: "string"
+        doctor:
+          type: "string"
+        status:
+          type: "string"
+        location:
+          type: "string"
+        createdAt:
+          type: "string"
+          format: "date-time"
+
+  securitySchemes:
+    CognitoAuthorizer:
+      type: "apiKey"
+      name: "Authorization"
+      in: "header"
+      x-amazon-apigateway-authtype: "cognito_user_pools"
+      x-amazon-apigateway-authorizer:
+        type: "cognito_user_pools"
+        providerARNs:
+          - "${cognito_user_pool_arn}"
+
+x-amazon-apigateway-request-validators:
+  validate-body:
+    validateRequestBody: true
+    validateRequestParameters: false
+  validate-params:
+    validateRequestBody: false
+    validateRequestParameters: true
+  validate-all:
+    validateRequestBody: true
+    validateRequestParameters: true

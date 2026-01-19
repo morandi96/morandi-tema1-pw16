@@ -17,6 +17,11 @@ import router from './router';
 
 Amplify.configure(amplifyConfiguration);
 
+// Initialize auth listener
+import { useAuth } from './composables/useAuth';
+const { setupAuthListener } = useAuth();
+setupAuthListener();
+
 import Button from '@/components/shared/atoms/Button.vue';
 import Icon from '@/components/shared/atoms/Icon.vue';
 import LoadingSpinner from '@/components/shared/atoms/LoadingSpinner.vue';

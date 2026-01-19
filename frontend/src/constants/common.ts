@@ -19,8 +19,7 @@ export const ReservationStatus = {
   ANNULLATA: 'Annullata'
 } as const;
 
-export type ReservationStatusType =
-  (typeof ReservationStatus)[keyof typeof ReservationStatus];
+export type ReservationStatusType = (typeof ReservationStatus)[keyof typeof ReservationStatus];
 
 // Colori Quasar per gli stati delle prenotazioni
 export const RESERVATION_STATUS_COLORS: Record<ReservationStatusType, string> = {
@@ -29,3 +28,31 @@ export const RESERVATION_STATUS_COLORS: Record<ReservationStatusType, string> = 
   [ReservationStatus.COMPLETATA]: 'info',
   [ReservationStatus.ANNULLATA]: 'negative'
 };
+
+export const DOCTORS = [
+  'Dr. Mario Rossi',
+  'Dr. Anna Verdi',
+  'Dr. Luigi Bianchi',
+  'Dr. Sara Neri',
+  'Dr. Paolo Ferrari'
+];
+
+export const AVAILABLE_TIMES = [
+  '08:00',
+  '08:30',
+  '09:00',
+  '09:30',
+  '10:00',
+  '10:30',
+  '11:00',
+  '11:30',
+  '14:00',
+  '14:30',
+  '15:00',
+  '15:30',
+  '16:00',
+  '16:30',
+  '17:00',
+  '17:30',
+  '18:00'
+];

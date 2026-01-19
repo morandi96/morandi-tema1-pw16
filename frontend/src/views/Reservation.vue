@@ -74,9 +74,7 @@ const getStatusColor = (status: ReservationStatusType) => {
 
 // Funzioni azioni
 const newReservation = () => {
-  console.log('Nuova prenotazione');
   newReservationDialog.value = true;
-  // TODO: Implementare form nuova prenotazione
 };
 </script>
 
