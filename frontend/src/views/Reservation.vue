@@ -106,7 +106,7 @@ const newReservation = () => {
     </div>
 
     <!-- Messaggio se non ci sono prenotazioni attive -->
-    <div v-else class="text-center q-pb-lg">
+    <div v-else class="text-center q-mb-xl">
       <q-card class="shadow-1">
         <q-card-section>
           <q-icon name="event_available" size="64px" color="grey-5" />
@@ -124,44 +124,44 @@ const newReservation = () => {
     </div>
     <NewReservation v-model:model="newReservationDialog" />
 
-    <!-- Sezione Storico -->
-    <div>
-      <div class="text-h6 text-weight-bold q-mb-md">{{ $t('reservation.date') }}</div>
+    <!-- Sezione Storico Prenotazioni -->
+    <q-card>
+      <q-card-section class="q-pb-none">
+        <div class="text-h6 text-weight-bold">{{ $t('reservation.date') }}</div>
+      </q-card-section>
 
-      <q-card>
-        <q-card-section class="pa-0">
-          <!-- Loading Lista -->
-          <div v-if="isLoadingList" class="text-center q-pa-xl">
-            <q-spinner color="primary" size="40px" />
-            <div class="text-subtitle2 text-grey-7 q-mt-md">
-              {{ $t('reservation.load_history') }}
-            </div>
+      <q-card-section class="pa-0">
+        <!-- Loading Lista -->
+        <div v-if="isLoadingList" class="text-center q-pa-xl">
+          <q-spinner color="primary" size="40px" />
+          <div class="text-subtitle2 text-grey-7 q-mt-md">
+            {{ $t('reservation.load_history') }}
           </div>
+        </div>
 
-          <!-- Errore Lista -->
-          <q-banner v-else-if="isErrorList" class="bg-negative text-white" rounded>
-            <template #avatar>
-              <q-icon name="error" color="white" />
-            </template>
-            {{ $t('reservation.history_error') }}
-          </q-banner>
+        <!-- Errore Lista -->
+        <q-banner v-else-if="isErrorList" class="bg-negative text-white" rounded>
+          <template #avatar>
+            <q-icon name="error" color="white" />
+          </template>
+          {{ $t('reservation.history_error') }}
+        </q-banner>
 
-          <!-- Tabella -->
-          <Table v-else :headers="columns" :data="tableData" :slot-names="['status']" flat>
-            <!-- Slot per lo stato con badge colorato -->
-            <template #status="{ rowItem }">
-              <q-td :props="rowItem" class="text-center">
-                <q-badge
-                  :color="getStatusColor(rowItem.row.status)"
-                  :label="rowItem.row.status"
-                  rounded
-                />
-              </q-td>
-            </template>
-          </Table>
-        </q-card-section>
-      </q-card>
-    </div>
+        <!-- Tabella -->
+        <Table v-else :headers="columns" :data="tableData" :slot-names="['status']" flat>
+          <!-- Slot per lo stato con badge colorato -->
+          <template #status="{ rowItem }">
+            <q-td :props="rowItem" class="text-center">
+              <q-badge
+                :color="getStatusColor(rowItem.row.status)"
+                :label="rowItem.row.status"
+                rounded
+              />
+            </q-td>
+          </template>
+        </Table>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 

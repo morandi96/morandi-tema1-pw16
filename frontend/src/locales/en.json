@@ -58,6 +58,19 @@
       "gastrointestinal_problems": "Problemi gastrointestinali"
     }
   },
+  "report": {
+    "title": "Referti",
+    "subtitle": "Qui potrai consultare e caricare i tuoi referti medici",
+    "table_title": "Visite Completate",
+    "loading": "Caricamento referti...",
+    "error": "Errore nel caricamento dei referti",
+    "no_data": "Nessuna visita completata",
+    "download_prescription": "Scarica ricetta medica",
+    "upload_prescription": "Carica ricetta medica",
+    "download_report": "Scarica referto",
+    "upload_report": "Carica referto",
+    "no_document": "Non caricato"
+  },
   "toast": {
     "reservation": {
       "create": {
@@ -68,6 +81,13 @@
         "success": "Prenotazione cancellata con successo",
         "error": "Errore durante la cancellazione della prenotazione"
       }
+    },
+    "report": {
+      "upload": {
+        "success": "Documento caricato con successo",
+        "error": "Errore durante il caricamento del documento"
+      },
+      "file_too_large": "Il file supera la dimensione massima di 5MB"
     }
   }
 }

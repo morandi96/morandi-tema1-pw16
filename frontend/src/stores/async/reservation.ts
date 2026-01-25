@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import { get, post, del } from 'aws-amplify/api';
+import { get, post, put } from 'aws-amplify/api';
 import { API_NAME, idToken, queryCommons } from './common';
-import type { Reservation } from '@/types/types';
+import type { Reservation, ReservationDocument } from '@/types/types';
 
 const KEY = 'reservations';
 const basePath = '/reservation';
@@ -76,8 +76,8 @@ export const useReservationsList = () => {
 };
 
 /**
- * Hook per annullare una prenotazione
- * DELETE /reservation/cancel/:id
+ * Hook per annullare una prenotazione (cambia stato in "Annullata")
+ * PUT /reservation/cancel/:id
  */
 export const useCancelReservation = () => {
   const queryClient = useQueryClient();
@@ -85,8 +85,8 @@ export const useCancelReservation = () => {
   return useMutation({
     mutationFn: async (reservationId: string) => {
 
-      // Chiamata API reale con AWS Amplify
-      const restOperation = del({
+      // Chiamata API per aggiornare lo stato a "Annullata"
+      const restOperation = put({
         apiName: API_NAME,
         path: `${basePath}/cancel/${reservationId}`,
         options: {
@@ -126,7 +126,8 @@ export const useCreateReservation = () => {
             Authorization: `Bearer ${await idToken()}`,
             'Content-Type': 'application/json'
           },
-          body: reservation
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          body: reservation as any
         }
       });
 
@@ -139,6 +140,49 @@ export const useCreateReservation = () => {
       // Aggiorna la cache con la nuova prenotazione
       queryClient.setQueryData(reservationKeys.active(), newReservation);
       // Invalida la lista per refresh
+      queryClient.invalidateQueries({ queryKey: reservationKeys.list() });
+    }
+  });
+};
+
+/**
+ * Hook per caricare un documento (referto utente o ricetta medico)
+ * PUT /reservation/:id/document
+ */
+export const useUploadDocument = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      reservationId,
+      document,
+      documentType
+    }: {
+      reservationId: string;
+      document: ReservationDocument;
+      documentType: 'user' | 'doctor';
+    }) => {
+
+      const restOperation = put({
+        apiName: API_NAME,
+        path: `${basePath}/${reservationId}/document`,
+        options: {
+          headers: {
+            Authorization: `Bearer ${await idToken()}`,
+            'Content-Type': 'application/json'
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          body: { document, documentType } as any
+        }
+      });
+
+      const { body } = await restOperation.response;
+      const response = await body.json();
+
+      return response as unknown as Reservation;
+    },
+    onSuccess: () => {
+      // Invalida la lista per forzare il refresh
       queryClient.invalidateQueries({ queryKey: reservationKeys.list() });
     }
   });

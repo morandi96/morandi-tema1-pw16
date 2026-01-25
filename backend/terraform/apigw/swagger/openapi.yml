@@ -234,13 +234,13 @@ paths:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Methods: "'PUT,OPTIONS'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
               application/json: "{}"
-    delete:
-      summary: "Cancella una prenotazione"
-      description: "Elimina definitivamente la prenotazione specificata se appartiene all'utente autenticato"
+    put:
+      summary: "Annulla una prenotazione"
+      description: "Cambia lo stato della prenotazione in 'Annullata' se appartiene all'utente autenticato"
       operationId: "cancelReservation"
       security:
         - CognitoAuthorizer: []
@@ -248,12 +248,12 @@ paths:
         - name: "id"
           in: "path"
           required: true
-          description: "ID della prenotazione da cancellare"
+          description: "ID della prenotazione da annullare"
           schema:
             type: "string"
       responses:
         "200":
-          description: "Prenotazione cancellata con successo"
+          description: "Prenotazione annullata con successo"
           content:
             application/json:
               schema:
@@ -261,8 +261,8 @@ paths:
                 properties:
                   message:
                     type: "string"
-                  reservationId:
-                    type: "string"
+                  reservation:
+                    $ref: "#/components/schemas/Reservation"
         "401":
           description: "Non autorizzato"
           content:
@@ -280,6 +280,97 @@ paths:
         type: "aws_proxy"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_cancel_arn}/invocations"
+        passthroughBehavior: "when_no_match"
+
+  /reservation/{id}/document:
+    options:
+      summary: "CORS preflight"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "CORS headers"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'PUT,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "{}"
+    put:
+      summary: "Carica un documento sulla prenotazione"
+      description: "Carica un documento (referto utente o ricetta medico) sulla prenotazione specificata"
+      operationId: "uploadDocument"
+      security:
+        - CognitoAuthorizer: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "ID della prenotazione"
+          schema:
+            type: "string"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDocumentRequest"
+      responses:
+        "200":
+          description: "Documento caricato con successo"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  reservation:
+                    $ref: "#/components/schemas/Reservation"
+        "400":
+          description: "Richiesta non valida"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "Non autorizzato"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Prenotazione non trovata"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-amazon-apigateway-request-validator: "validate-all"
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_upload_document_arn}/invocations"
         passthroughBehavior: "when_no_match"
 
 components:
@@ -335,6 +426,10 @@ components:
         createdAt:
           type: "string"
           format: "date-time"
+        userDocument:
+          $ref: "#/components/schemas/ReservationDocument"
+        doctorDocument:
+          $ref: "#/components/schemas/ReservationDocument"
 
     ErrorResponse:
       type: "object"
@@ -368,6 +463,37 @@ components:
         createdAt:
           type: "string"
           format: "date-time"
+
+    UploadDocumentRequest:
+      type: "object"
+      required:
+        - document
+        - documentType
+      properties:
+        document:
+          $ref: "#/components/schemas/ReservationDocument"
+        documentType:
+          type: "string"
+          enum: ["user", "doctor"]
+          description: "Tipo di documento: 'user' per referto utente, 'doctor' per ricetta medico"
+
+    ReservationDocument:
+      type: "object"
+      required:
+        - fileName
+        - fileBase64
+        - uploadedAt
+      properties:
+        fileName:
+          type: "string"
+          description: "Nome del file caricato"
+        fileBase64:
+          type: "string"
+          description: "Contenuto del file codificato in base64"
+        uploadedAt:
+          type: "string"
+          format: "date-time"
+          description: "Timestamp di caricamento del documento"
 
   securitySchemes:
     CognitoAuthorizer:

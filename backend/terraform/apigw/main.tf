@@ -4,12 +4,13 @@ resource "aws_api_gateway_rest_api" "reservation_api" {
   description = ""
 
   body = templatefile("${path.module}/swagger/openapi.yml", {
-    region                = var.region
-    cognito_user_pool_arn = var.cognito_user_pool_arn
-    lambda_create_arn     = aws_lambda_function.create_reservation.arn
-    lambda_list_arn       = aws_lambda_function.list_reservations.arn
-    lambda_active_arn     = aws_lambda_function.active_reservation.arn
-    lambda_cancel_arn     = aws_lambda_function.cancel_reservation.arn
+    region                     = var.region
+    cognito_user_pool_arn      = var.cognito_user_pool_arn
+    lambda_create_arn          = aws_lambda_function.create_reservation.arn
+    lambda_list_arn            = aws_lambda_function.list_reservations.arn
+    lambda_active_arn          = aws_lambda_function.active_reservation.arn
+    lambda_cancel_arn          = aws_lambda_function.cancel_reservation.arn
+    lambda_upload_document_arn = aws_lambda_function.upload_document.arn
   })
 
   endpoint_configuration {
@@ -111,7 +112,7 @@ resource "aws_api_gateway_gateway_response" "cors_4xx" {
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'"
     "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization'"
-    "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'"
+    "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,OPTIONS'"
   }
 }
 
@@ -122,6 +123,6 @@ resource "aws_api_gateway_gateway_response" "cors_5xx" {
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'"
     "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization'"
-    "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'"
+    "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,OPTIONS'"
   }
 }

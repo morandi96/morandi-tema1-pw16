@@ -25,7 +25,7 @@ export type ReservationStatusType = (typeof ReservationStatus)[keyof typeof Rese
 export const RESERVATION_STATUS_COLORS: Record<ReservationStatusType, string> = {
   [ReservationStatus.CONFERMATA]: 'positive',
   [ReservationStatus.IN_ATTESA]: 'warning',
-  [ReservationStatus.COMPLETATA]: 'info',
+  [ReservationStatus.COMPLETATA]: 'positive',
   [ReservationStatus.ANNULLATA]: 'negative'
 };
 

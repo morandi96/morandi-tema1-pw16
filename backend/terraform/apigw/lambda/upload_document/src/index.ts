@@ -14,6 +14,17 @@ const corsHeaders = {
   'Content-Type': 'application/json'
 };
 
+interface ReservationDocument {
+  fileName: string;
+  fileBase64: string;
+  uploadedAt: string;
+}
+
+interface UploadDocumentRequest {
+  document: ReservationDocument;
+  documentType: 'user' | 'doctor';
+}
+
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.log('Event:', JSON.stringify(event, null, 2));
 
@@ -52,9 +63,46 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
 
-    console.log('Annullando prenotazione:', reservationId, 'per utente:', userId);
+    // Parse del body
+    if (!event.body) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Body mancante',
+          code: 'MISSING_BODY'
+        })
+      };
+    }
 
-    // Prima verifica che la prenotazione esista e appartenga all'utente
+    const requestBody: UploadDocumentRequest = JSON.parse(event.body);
+    const { document, documentType } = requestBody;
+
+    if (!document || !documentType) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Documento o tipo documento mancante',
+          code: 'MISSING_DOCUMENT_DATA'
+        })
+      };
+    }
+
+    if (documentType !== 'user' && documentType !== 'doctor') {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Tipo documento non valido. Usare "user" o "doctor"',
+          code: 'INVALID_DOCUMENT_TYPE'
+        })
+      };
+    }
+
+    console.log('Caricando documento per prenotazione:', reservationId, 'tipo:', documentType);
+
+    // Verifica che la prenotazione esista e appartenga all'utente
     const getResult = await docClient.send(new GetCommand({
       TableName: TABLE_NAME,
       Key: {
@@ -74,31 +122,44 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
 
-    // Aggiorna lo stato della prenotazione a "Annullata"
+    // Determina quale attributo aggiornare in base al tipo di documento
+    const attributeName = documentType === 'user' ? 'userDocument' : 'doctorDocument';
+
+    // Aggiorna il documento sulla prenotazione
     const updateResult = await docClient.send(new UpdateCommand({
       TableName: TABLE_NAME,
       Key: {
         PK: `USER#${userId}`,
         SK: `RESERVATION#${reservationId}`
       },
-      UpdateExpression: 'SET #status = :status',
-      ExpressionAttributeNames: {
-        '#status': 'status'
-      },
+      UpdateExpression: `SET ${attributeName} = :document`,
       ExpressionAttributeValues: {
-        ':status': 'Annullata'
+        ':document': document
       },
       ReturnValues: 'ALL_NEW'
     }));
 
-    console.log('Prenotazione annullata con successo:', reservationId);
+    console.log('Documento caricato con successo:', reservationId, attributeName);
+
+    // Formatta la risposta con i dati della prenotazione aggiornata
+    const updatedReservation = updateResult.Attributes;
 
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: JSON.stringify({
-        message: 'Prenotazione annullata con successo',
-        reservation: updateResult.Attributes
+        message: 'Documento caricato con successo',
+        reservation: {
+          id: updatedReservation?.id,
+          date: updatedReservation?.date,
+          time: updatedReservation?.time,
+          category: updatedReservation?.category,
+          doctor: updatedReservation?.doctor,
+          status: updatedReservation?.status,
+          location: updatedReservation?.location,
+          userDocument: updatedReservation?.userDocument,
+          doctorDocument: updatedReservation?.doctorDocument
+        }
       })
     };
 
