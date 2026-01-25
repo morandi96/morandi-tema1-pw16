@@ -318,9 +318,9 @@ paths:
             responseTemplates:
               application/json: "{}"
     put:
-      summary: "Carica un documento sulla prenotazione"
-      description: "Carica un documento (referto utente o ricetta medico) sulla prenotazione specificata"
-      operationId: "uploadDocument"
+      summary: "Gestisce documenti sulla prenotazione"
+      description: "Carica o elimina un documento (referto utente o ricetta medico) sulla prenotazione specificata"
+      operationId: "manageDocument"
       security:
         - CognitoAuthorizer: []
       parameters:
@@ -335,10 +335,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UploadDocumentRequest"
+              $ref: "#/components/schemas/DocumentRequest"
       responses:
         "200":
-          description: "Documento caricato con successo"
+          description: "Operazione completata con successo"
           content:
             application/json:
               schema:
@@ -464,18 +464,39 @@ components:
           type: "string"
           format: "date-time"
 
+    DocumentRequest:
+      oneOf:
+        - $ref: "#/components/schemas/UploadDocumentRequest"
+        - $ref: "#/components/schemas/DeleteDocumentRequest"
+
     UploadDocumentRequest:
       type: "object"
       required:
+        - action
         - document
         - documentType
       properties:
+        action:
+          type: "string"
+          enum: ["upload"]
         document:
           $ref: "#/components/schemas/ReservationDocument"
         documentType:
           type: "string"
           enum: ["user", "doctor"]
-          description: "Tipo di documento: 'user' per referto utente, 'doctor' per ricetta medico"
+
+    DeleteDocumentRequest:
+      type: "object"
+      required:
+        - action
+        - documentType
+      properties:
+        action:
+          type: "string"
+          enum: ["delete"]
+        documentType:
+          type: "string"
+          enum: ["user", "doctor"]
 
     ReservationDocument:
       type: "object"

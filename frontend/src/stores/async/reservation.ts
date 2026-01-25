@@ -22,8 +22,6 @@ export const useActiveReservation = () => {
     ...queryCommons,
     queryKey: reservationKeys.active(),
     queryFn: async () => {
-
-      // Chiamata API reale con AWS Amplify
       const restOperation = get({
         apiName: API_NAME,
         path: `${basePath}/active`,
@@ -53,8 +51,6 @@ export const useReservationsList = () => {
     ...queryCommons,
     queryKey: reservationKeys.list(),
     queryFn: async () => {
-
-      // Chiamata API reale con AWS Amplify
       const restOperation = get({
         apiName: API_NAME,
         path: `${basePath}/list`,
@@ -68,7 +64,7 @@ export const useReservationsList = () => {
       const { body } = await restOperation.response;
       const response = await body.json();
 
-      return response as Reservation[];
+      return response as any as Reservation[];
     }
   });
 
@@ -84,8 +80,6 @@ export const useCancelReservation = () => {
 
   return useMutation({
     mutationFn: async (reservationId: string) => {
-
-      // Chiamata API per aggiornare lo stato a "Annullata"
       const restOperation = put({
         apiName: API_NAME,
         path: `${basePath}/cancel/${reservationId}`,
@@ -100,7 +94,6 @@ export const useCancelReservation = () => {
       await restOperation.response;
     },
     onSuccess: () => {
-      // Invalida le query per forzare il refresh
       queryClient.invalidateQueries({ queryKey: reservationKeys.active() });
       queryClient.invalidateQueries({ queryKey: reservationKeys.list() });
     }
@@ -116,8 +109,6 @@ export const useCreateReservation = () => {
 
   return useMutation({
     mutationFn: async (reservation: Omit<Reservation, 'id'>) => {
-
-      // Chiamata API reale con AWS Amplify
       const restOperation = post({
         apiName: API_NAME,
         path: `${basePath}/create`,
@@ -134,7 +125,7 @@ export const useCreateReservation = () => {
       const { body } = await restOperation.response;
       const response = await body.json();
 
-      return response as Reservation;
+      return response as any as Reservation;
     },
     onSuccess: (newReservation: Reservation) => {
       // Aggiorna la cache con la nuova prenotazione
@@ -162,7 +153,6 @@ export const useUploadDocument = () => {
       document: ReservationDocument;
       documentType: 'user' | 'doctor';
     }) => {
-
       const restOperation = put({
         apiName: API_NAME,
         path: `${basePath}/${reservationId}/document`,
@@ -172,7 +162,47 @@ export const useUploadDocument = () => {
             'Content-Type': 'application/json'
           },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          body: { document, documentType } as any
+          body: { action: 'upload', document, documentType } as any
+        }
+      });
+
+      const { body } = await restOperation.response;
+      const response = await body.json();
+
+      return response as unknown as Reservation;
+    },
+    onSuccess: () => {
+      // Invalida la lista per forzare il refresh
+      queryClient.invalidateQueries({ queryKey: reservationKeys.list() });
+    }
+  });
+};
+
+/**
+ * Hook per eliminare un documento (referto utente o ricetta medico)
+ * PUT /reservation/:id/document
+ */
+export const useDeleteDocument = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      reservationId,
+      documentType
+    }: {
+      reservationId: string;
+      documentType: 'user' | 'doctor';
+    }) => {
+      const restOperation = put({
+        apiName: API_NAME,
+        path: `${basePath}/${reservationId}/document`,
+        options: {
+          headers: {
+            Authorization: `Bearer ${await idToken()}`,
+            'Content-Type': 'application/json'
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          body: { action: 'delete', documentType } as any
         }
       });
 

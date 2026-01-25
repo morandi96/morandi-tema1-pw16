@@ -20,8 +20,9 @@ interface ReservationDocument {
   uploadedAt: string;
 }
 
-interface UploadDocumentRequest {
-  document: ReservationDocument;
+interface DocumentRequest {
+  action: 'upload' | 'delete';
+  document?: ReservationDocument; // Optional per delete
   documentType: 'user' | 'doctor';
 }
 
@@ -75,16 +76,53 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
 
-    const requestBody: UploadDocumentRequest = JSON.parse(event.body);
-    const { document, documentType } = requestBody;
-
-    if (!document || !documentType) {
+    let requestBody: DocumentRequest;
+    try {
+      requestBody = JSON.parse(event.body);
+      console.log('Parsed request body:', JSON.stringify(requestBody, null, 2));
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
       return {
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
-          message: 'Documento o tipo documento mancante',
-          code: 'MISSING_DOCUMENT_DATA'
+          message: 'Invalid JSON in request body',
+          code: 'INVALID_JSON'
+        })
+      };
+    }
+
+    const { action, document, documentType } = requestBody;
+
+    if (!action || !documentType) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Azione o tipo documento mancante',
+          code: 'MISSING_REQUIRED_DATA'
+        })
+      };
+    }
+
+    if (action !== 'upload' && action !== 'delete') {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Azione non valida. Usare "upload" o "delete"',
+          code: 'INVALID_ACTION'
+        })
+      };
+    }
+
+    if (action === 'upload' && !document) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Documento mancante per upload',
+          code: 'MISSING_DOCUMENT_FOR_UPLOAD'
         })
       };
     }
@@ -100,7 +138,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
 
-    console.log('Caricando documento per prenotazione:', reservationId, 'tipo:', documentType);
+    console.log(`${action} documento per prenotazione:`, reservationId, 'tipo:', documentType);
 
     // Verifica che la prenotazione esista e appartenga all'utente
     const getResult = await docClient.send(new GetCommand({
@@ -125,21 +163,39 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // Determina quale attributo aggiornare in base al tipo di documento
     const attributeName = documentType === 'user' ? 'userDocument' : 'doctorDocument';
 
-    // Aggiorna il documento sulla prenotazione
-    const updateResult = await docClient.send(new UpdateCommand({
-      TableName: TABLE_NAME,
-      Key: {
-        PK: `USER#${userId}`,
-        SK: `RESERVATION#${reservationId}`
-      },
-      UpdateExpression: `SET ${attributeName} = :document`,
-      ExpressionAttributeValues: {
-        ':document': document
-      },
-      ReturnValues: 'ALL_NEW'
-    }));
+    let updateResult;
+    let actionMessage;
 
-    console.log('Documento caricato con successo:', reservationId, attributeName);
+    if (action === 'upload') {
+      // Upload del documento
+      updateResult = await docClient.send(new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: {
+          PK: `USER#${userId}`,
+          SK: `RESERVATION#${reservationId}`
+        },
+        UpdateExpression: `SET ${attributeName} = :document`,
+        ExpressionAttributeValues: {
+          ':document': document
+        },
+        ReturnValues: 'ALL_NEW'
+      }));
+      actionMessage = 'Documento caricato con successo';
+    } else {
+      // Delete del documento - rimuove l'attributo
+      updateResult = await docClient.send(new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: {
+          PK: `USER#${userId}`,
+          SK: `RESERVATION#${reservationId}`
+        },
+        UpdateExpression: `REMOVE ${attributeName}`,
+        ReturnValues: 'ALL_NEW'
+      }));
+      actionMessage = 'Documento eliminato con successo';
+    }
+
+    console.log(`${action} completato con successo:`, reservationId, attributeName);
 
     // Formatta la risposta con i dati della prenotazione aggiornata
     const updatedReservation = updateResult.Attributes;
@@ -148,7 +204,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       statusCode: 200,
       headers: corsHeaders,
       body: JSON.stringify({
-        message: 'Documento caricato con successo',
+        message: actionMessage,
         reservation: {
           id: updatedReservation?.id,
           date: updatedReservation?.date,

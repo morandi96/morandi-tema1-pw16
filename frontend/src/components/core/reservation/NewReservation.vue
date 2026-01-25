@@ -6,7 +6,7 @@ import Dialog from '@/components/shared/organisms/Dialog.vue';
 import { useCreateReservation } from '@/stores/async/reservation';
 import { AVAILABLE_TIMES, DOCTORS, ReservationStatus } from '@/constants/common';
 import type { Reservation } from '@/types/types';
-import { generateRandomBlockedDates } from '@/utils/common';
+import { commonBlockedDates } from '@/utils/common';
 
 // Props
 const props = withDefaults(
@@ -36,12 +36,20 @@ const blockedDates = ref<string[]>([]);
 
 // Verifica se una data è bloccata (weekend o nelle date bloccate)
 const isDateBlocked = (date: string): boolean => {
+  const dateObj = new Date(date.replace(/\//g, '-'));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Blocca date passate
+  if (dateObj < today) {
+    return true;
+  }
+
   if (blockedDates.value.includes(date)) {
     return true;
   }
 
   // Verifica se è weekend
-  const dateObj = new Date(date.replace(/\//g, '-'));
   const dayOfWeek = dateObj.getDay();
   return dayOfWeek === 0 || dayOfWeek === 6;
 };
@@ -137,7 +145,7 @@ const handleSubmit = () => {
 
 // Inizializza le date bloccate al mount
 onMounted(() => {
-  blockedDates.value = generateRandomBlockedDates(4);
+  blockedDates.value = commonBlockedDates(4);
 });
 </script>
 

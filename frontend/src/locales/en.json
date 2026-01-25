@@ -58,6 +58,11 @@
       "gastrointestinal_problems": "Problemi gastrointestinali"
     }
   },
+  "document": {
+    "preview": "Anteprima",
+    "download": "Scarica",
+    "delete": "Elimina"
+  },
   "report": {
     "title": "Referti",
     "subtitle": "Qui potrai consultare e caricare i tuoi referti medici",

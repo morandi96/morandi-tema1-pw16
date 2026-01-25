@@ -9,17 +9,22 @@ import {
   type ReservationStatusType
 } from '@/constants/common';
 import type { QTableProps } from 'quasar';
-import { useReservationsList, useUploadDocument } from '@/stores/async/reservation';
+import {
+  useReservationsList,
+  useUploadDocument,
+  useDeleteDocument
+} from '@/stores/async/reservation';
 import type { Reservation, ReservationDocument } from '@/types/types';
 
 const { t } = useI18n();
 const $q = useQuasar();
 
-// Vue Query - Lista prenotazioni (filtriamo quelle completate)
+// Vue Query - Lista prenotazioni
 const { reservationsList, isLoading, isError } = useReservationsList();
 
-// Mutation per upload documento
+// Mutation per upload e delete documento
 const { mutate: uploadDocument, isPending: isUploading } = useUploadDocument();
+const { mutate: deleteDocumentMutation, isPending: isDeleting } = useDeleteDocument();
 
 // Computed per gestire i dati della tabella (solo prenotazioni completate)
 const tableData = computed(() => {
@@ -95,12 +100,6 @@ const openFilePicker = (reservationId: string, type: 'user' | 'doctor') => {
   fileInputRef.value?.click();
 };
 
-// Funzione per verificare se un file è un'immagine
-const isImageFile = (fileName: string) => {
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
-  return imageExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
-};
-
 // Funzione per ottenere URL blob per anteprima immagini
 const getImagePreviewUrl = (doc: ReservationDocument) => {
   try {
@@ -127,12 +126,56 @@ const previewImage = (doc: ReservationDocument) => {
   $q.dialog({
     title: doc.fileName,
     message: `
-      <div class="text-center">
-        <img src="${imageUrl}" style="max-width: 100%; max-height: 70vh;" />
+      <div class="text-center flex justify-center">
+        <img src="${imageUrl}" style="max-width: 100%; min-height: 70vh; object-fit: contain;" />
       </div>
     `,
     html: true,
-    ok: 'Chiudi'
+    ok: 'Chiudi',
+    maximized: true
+  });
+};
+
+// Funzione per eliminare un documento
+const deleteDocument = (reservationId: string, documentType: 'user' | 'doctor') => {
+  $q.dialog({
+    title: 'Conferma eliminazione',
+    ok: {
+      label: 'Cancella prenotazione',
+      color: 'negative',
+      unelevated: true
+    },
+    message: `Sei sicuro di voler eliminare questo documento?`,
+    cancel: {
+      label: 'Annulla',
+      color: 'grey',
+      flat: true
+    },
+    persistent: true
+  }).onOk(() => {
+    deleteDocumentMutation(
+      {
+        reservationId,
+        documentType
+      },
+      {
+        onSuccess: () => {
+          $q.notify({
+            type: 'positive',
+            message: 'Documento eliminato con successo',
+            position: 'top'
+          });
+        },
+        onError: (error) => {
+          console.error('Errore eliminazione documento:', error);
+          $q.notify({
+            type: 'negative',
+            message: "Errore durante l'eliminazione del documento",
+            position: 'top'
+          });
+        }
+      }
+    );
   });
 };
 
@@ -142,17 +185,6 @@ const handleFileSelect = async (event: Event) => {
   const file = target.files?.[0];
 
   if (!file || !currentUploadReservation.value) return;
-
-  // Verifica dimensione file (max 5MB per DynamoDB)
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  if (file.size > maxSize) {
-    $q.notify({
-      type: 'negative',
-      message: t('toast.report.file_too_large'),
-      position: 'top'
-    });
-    return;
-  }
 
   // Cattura i valori prima dell'operazione asincrona
   const reservationId = currentUploadReservation.value!.id;
@@ -322,35 +354,35 @@ const downloadDocument = (reservation: Reservation, type: 'user' | 'doctor') => 
           <!-- Slot per documento medico (ricetta) -->
           <template #doctorDocument="{ rowItem }">
             <q-td :props="rowItem" class="text-center">
-              <div v-if="rowItem.row.doctorDocument" class="q-gutter-sm">
-                <!-- Anteprima immagine se è un'immagine -->
-                <div v-if="isImageFile(rowItem.row.doctorDocument.fileName)" class="q-mb-sm">
-                  <q-avatar size="60px" class="cursor-pointer" @click="previewImage(rowItem.row.doctorDocument)">
-                    <q-img
-                      :src="getImagePreviewUrl(rowItem.row.doctorDocument) || ''"
-                      fit="cover"
-                    />
-                    <div class="absolute-full flex flex-center bg-black bg-opacity-30">
-                      <q-icon name="zoom_in" color="white" size="sm" />
-                    </div>
-                  </q-avatar>
-                </div>
-
-                <!-- Pulsante download -->
-                <q-btn
-                  flat
-                  round
-                  color="positive"
-                  icon="download"
-                  size="sm"
-                  @click="downloadDocument(rowItem.row, 'doctor')"
-                >
-                  <q-tooltip>{{ $t('report.download_prescription') }}</q-tooltip>
-                </q-btn>
-
-                <!-- Nome file -->
-                <div class="text-caption text-grey-6" style="max-width: 100px; word-break: break-all;">
-                  {{ rowItem.row.doctorDocument.fileName }}
+              <div v-if="rowItem.row.doctorDocument">
+                <div class="flex justify-center q-gutter-sm">
+                  <q-btn
+                    round
+                    size="xs"
+                    color="info"
+                    icon="visibility"
+                    @click="previewImage(rowItem.row.doctorDocument)"
+                  >
+                    <q-tooltip>{{ $t('document.preview') }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    round
+                    size="xs"
+                    color="positive"
+                    icon="download"
+                    @click="downloadDocument(rowItem.row, 'doctor')"
+                  >
+                    <q-tooltip>{{ $t('document.download') }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    round
+                    size="xs"
+                    color="negative"
+                    icon="close"
+                    @click="deleteDocument(rowItem.row.id, 'doctor')"
+                  >
+                    <q-tooltip>{{ $t('document.delete') }}</q-tooltip>
+                  </q-btn>
                 </div>
               </div>
               <div v-else>
@@ -375,36 +407,44 @@ const downloadDocument = (reservation: Reservation, type: 'user' | 'doctor') => 
           <!-- Slot per documento utente (referto) -->
           <template #userDocument="{ rowItem }">
             <q-td :props="rowItem" class="text-center">
-              <div v-if="rowItem.row.userDocument" class="q-gutter-sm">
-                <!-- Anteprima immagine se è un'immagine -->
-                <div v-if="isImageFile(rowItem.row.userDocument.fileName)" class="q-mb-sm">
-                  <q-avatar size="60px" class="cursor-pointer" @click="previewImage(rowItem.row.userDocument)">
-                    <q-img
-                      :src="getImagePreviewUrl(rowItem.row.userDocument) || ''"
-                      fit="cover"
-                    />
-                    <div class="absolute-full flex flex-center bg-black bg-opacity-30">
-                      <q-icon name="zoom_in" color="white" size="sm" />
-                    </div>
-                  </q-avatar>
+              <div v-if="rowItem.row.userDocument">
+                <div class="flex justify-center q-gutter-sm">
+                  <q-btn
+                    round
+                    size="xs"
+                    color="info"
+                    icon="visibility"
+                    @click="previewImage(rowItem.row.userDocument)"
+                  >
+                    <q-tooltip>{{ $t('document.preview') }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    round
+                    size="xs"
+                    color="positive"
+                    icon="download"
+                    @click="downloadDocument(rowItem.row, 'user')"
+                  >
+                    <q-tooltip>{{ $t('document.download') }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    round
+                    size="xs"
+                    color="negative"
+                    icon="close"
+                    @click="deleteDocument(rowItem.row.id, 'user')"
+                  >
+                    <q-tooltip>{{ $t('document.delete') }}</q-tooltip>
+                  </q-btn>
                 </div>
-
-                <!-- Pulsante download -->
-                <q-btn
-                  flat
-                  round
-                  color="positive"
-                  icon="download"
-                  size="sm"
-                  @click="downloadDocument(rowItem.row, 'user')"
-                >
-                  <q-tooltip>{{ $t('report.download_report') }}</q-tooltip>
-                </q-btn>
 
                 <!-- Nome file -->
-                <div class="text-caption text-grey-6" style="max-width: 100px; word-break: break-all;">
+                <!-- <div
+                  class="text-caption text-grey-6 q-mt-xs"
+                  style="max-width: 80px; word-break: break-all"
+                >
                   {{ rowItem.row.userDocument.fileName }}
-                </div>
+                </div> -->
               </div>
               <div v-else>
                 <q-btn

@@ -1,7 +1,7 @@
 import Login from '@/views/Login.vue';
 import Reservation from '@/views/Reservation.vue';
 import Cancellation from '@/views/Cancellation.vue';
-import Report from '@/views/Report.vue';
+import Document from '@/views/Document.vue';
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { getCurrentUser } from 'aws-amplify/auth';
 
@@ -24,16 +24,16 @@ const router = createRouter({
       component: Reservation,
       meta: { requiresAuth: true }
     },
-    {
-      path: '/disdette',
-      name: 'Cancellation',
-      component: Cancellation,
-      meta: { requiresAuth: true }
-    },
+    // {
+    //   path: '/disdette',
+    //   name: 'Cancellation',
+    //   component: Cancellation,
+    //   meta: { requiresAuth: true }
+    // },
     {
       path: '/referti',
-      name: 'Report',
-      component: Report,
+      name: 'Document',
+      component: Document,
       meta: { requiresAuth: true }
     }
   ]
@@ -41,8 +41,8 @@ const router = createRouter({
 
 // Auth Guard
 router.beforeEach(async (to, _from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const requiresGuest = to.matched.some(record => record.meta.requiresGuest);
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const requiresGuest = to.matched.some((record) => record.meta.requiresGuest);
 
   try {
     const user = await getCurrentUser();

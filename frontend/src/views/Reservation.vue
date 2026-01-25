@@ -106,7 +106,7 @@ const newReservation = () => {
     </div>
 
     <!-- Messaggio se non ci sono prenotazioni attive -->
-    <div v-else class="text-center q-mb-xl">
+    <div v-else class="text-center q-mb-lg">
       <q-card class="shadow-1">
         <q-card-section>
           <q-icon name="event_available" size="64px" color="grey-5" />

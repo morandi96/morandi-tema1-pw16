@@ -1,4 +1,4 @@
-export const generateRandomBlockedDates = (count: number = 8): string[] => {
+export const commonBlockedDates = (count: number = 8): string[] => {
   const dates: string[] = [];
   const today = new Date();
   const currentYear = today.getFullYear();

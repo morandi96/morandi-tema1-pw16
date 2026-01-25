@@ -16,8 +16,6 @@ watch(
   (newPath) => {
     if (newPath.includes('prenotazioni')) {
       activeTab.value = 'prenotazioni';
-    } else if (newPath.includes('disdette')) {
-      activeTab.value = 'disdette';
     } else if (newPath.includes('referti')) {
       activeTab.value = 'referti';
     }
@@ -29,7 +27,6 @@ watch(
 watch(activeTab, (newTab) => {
   const routes: Record<string, string> = {
     prenotazioni: '/prenotazioni',
-    disdette: '/disdette',
     referti: '/referti'
   };
 
@@ -86,7 +83,6 @@ watch(activeTab, (newTab) => {
     <q-toolbar class="bg-primary text-white">
       <q-tabs v-model="activeTab" active-color="white" indicator-color="white" class="full-width">
         <q-tab name="prenotazioni" label="Prenotazioni" icon="calendar_month" />
-        <q-tab name="disdette" label="Disdette" icon="cancel_schedule_send" />
         <q-tab name="referti" label="Referti" icon="folder_open" />
       </q-tabs>
     </q-toolbar>
