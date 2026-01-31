@@ -13,10 +13,6 @@ export const reservationKeys = {
   list: () => [...reservationKeys.all, 'list'] as const
 };
 
-/**
- * Hook per recuperare la prenotazione attiva
- * GET /reservation/active
- */
 export const useActiveReservation = () => {
   const query = useQuery({
     ...queryCommons,
@@ -42,10 +38,6 @@ export const useActiveReservation = () => {
   return { ...query, activeReservation: query.data };
 };
 
-/**
- * Hook per recuperare lo storico prenotazioni
- * GET /reservation/list
- */
 export const useReservationsList = () => {
   const query = useQuery({
     ...queryCommons,
@@ -71,10 +63,6 @@ export const useReservationsList = () => {
   return { ...query, reservationsList: query.data };
 };
 
-/**
- * Hook per annullare una prenotazione (cambia stato in "Annullata")
- * PUT /reservation/cancel/:id
- */
 export const useCancelReservation = () => {
   const queryClient = useQueryClient();
 
@@ -100,10 +88,6 @@ export const useCancelReservation = () => {
   });
 };
 
-/**
- * Hook per creare una nuova prenotazione
- * POST /reservation/create
- */
 export const useCreateReservation = () => {
   const queryClient = useQueryClient();
 
@@ -136,10 +120,6 @@ export const useCreateReservation = () => {
   });
 };
 
-/**
- * Hook per caricare un documento (referto utente o ricetta medico)
- * PUT /reservation/:id/document
- */
 export const useUploadDocument = () => {
   const queryClient = useQueryClient();
 
@@ -178,10 +158,6 @@ export const useUploadDocument = () => {
   });
 };
 
-/**
- * Hook per eliminare un documento (referto utente o ricetta medico)
- * PUT /reservation/:id/document
- */
 export const useDeleteDocument = () => {
   const queryClient = useQueryClient();
 

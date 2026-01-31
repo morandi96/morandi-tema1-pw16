@@ -21,7 +21,6 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   console.log("Event:", JSON.stringify(event, null, 2));
 
-  // Handle OPTIONS for CORS preflight
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
@@ -31,7 +30,6 @@ export const handler = async (
   }
 
   try {
-    // Estrai l'ID utente Cognito dal token (sub claim)
     const userId = event.requestContext?.authorizer?.claims?.sub as
       | string
       | undefined;
@@ -47,7 +45,6 @@ export const handler = async (
       };
     }
 
-    // Parse del body
     const body: CreateReservationRequest = JSON.parse(event.body || "{}");
     const { date, time, category, doctor, location, status, notes } = body;
 

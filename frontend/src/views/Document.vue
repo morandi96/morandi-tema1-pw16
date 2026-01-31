@@ -32,11 +32,9 @@ const tableData = computed(() => {
   return reservationsList.value.filter((r) => r.status === ReservationStatus.COMPLETATA);
 });
 
-// Ref per il file input nascosto
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const currentUploadReservation = ref<{ id: string; type: 'user' | 'doctor' } | null>(null);
 
-// Definizione colonne tabella
 const columns: QTableProps['columns'] = [
   {
     name: 'date',
@@ -89,18 +87,15 @@ const columns: QTableProps['columns'] = [
   }
 ];
 
-// Funzione per ottenere il colore dello stato
 const getStatusColor = (status: ReservationStatusType) => {
   return RESERVATION_STATUS_COLORS[status] || 'grey';
 };
 
-// Funzione per aprire il file picker
 const openFilePicker = (reservationId: string, type: 'user' | 'doctor') => {
   currentUploadReservation.value = { id: reservationId, type };
   fileInputRef.value?.click();
 };
 
-// Funzione per ottenere URL blob per anteprima immagini
 const getImagePreviewUrl = (doc: ReservationDocument) => {
   try {
     const base64Data = doc.fileBase64.split(',').pop() || doc.fileBase64;
@@ -118,7 +113,6 @@ const getImagePreviewUrl = (doc: ReservationDocument) => {
   }
 };
 
-// Funzione per aprire anteprima immagine in dialog
 const previewImage = (doc: ReservationDocument) => {
   const imageUrl = getImagePreviewUrl(doc);
   if (!imageUrl) return;
@@ -136,7 +130,6 @@ const previewImage = (doc: ReservationDocument) => {
   });
 };
 
-// Funzione per eliminare un documento
 const deleteDocument = (reservationId: string, documentType: 'user' | 'doctor') => {
   $q.dialog({
     title: 'Conferma eliminazione',
@@ -179,14 +172,12 @@ const deleteDocument = (reservationId: string, documentType: 'user' | 'doctor') 
   });
 };
 
-// Funzione per gestire la selezione del file
 const handleFileSelect = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
 
   if (!file || !currentUploadReservation.value) return;
 
-  // Cattura i valori prima dell'operazione asincrona
   const reservationId = currentUploadReservation.value!.id;
   const documentType = currentUploadReservation.value!.type;
 
@@ -229,19 +220,16 @@ const handleFileSelect = async (event: Event) => {
 
   reader.readAsDataURL(file);
 
-  // Reset input
   target.value = '';
   currentUploadReservation.value = null;
 };
 
-// Funzione per scaricare un documento
 const downloadDocument = (reservation: Reservation, type: 'user' | 'doctor') => {
   const doc = type === 'user' ? reservation.userDocument : reservation.doctorDocument;
 
   if (!doc) return;
 
   try {
-    // Rimuovi il prefixo data:mime-type;base64, se presente
     const base64Data = doc.fileBase64.split(',').pop() || doc.fileBase64;
 
     // Converti base64 in blob
@@ -332,7 +320,6 @@ const downloadDocument = (reservation: Reservation, type: 'user' | 'doctor') => 
           <div class="text-h6 text-grey-7 q-mt-md">{{ $t('report.no_data') }}</div>
         </div>
 
-        <!-- Tabella -->
         <Table
           v-else
           :headers="columns"
@@ -437,14 +424,6 @@ const downloadDocument = (reservation: Reservation, type: 'user' | 'doctor') => 
                     <q-tooltip>{{ $t('document.delete') }}</q-tooltip>
                   </q-btn>
                 </div>
-
-                <!-- Nome file -->
-                <!-- <div
-                  class="text-caption text-grey-6 q-mt-xs"
-                  style="max-width: 80px; word-break: break-all"
-                >
-                  {{ rowItem.row.userDocument.fileName }}
-                </div> -->
               </div>
               <div v-else>
                 <q-btn
@@ -469,7 +448,3 @@ const downloadDocument = (reservation: Reservation, type: 'user' | 'doctor') => 
     </q-card>
   </div>
 </template>
-
-<style scoped>
-/* Stili personalizzati se necessari */
-</style>

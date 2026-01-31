@@ -1,6 +1,3 @@
-# Lambda: Upload Document
-
-# Build TypeScript prima di creare lo zip
 resource "null_resource" "build_upload_document" {
   triggers = {
     source_hash = filemd5("${path.module}/lambda/upload_document/src/index.ts")

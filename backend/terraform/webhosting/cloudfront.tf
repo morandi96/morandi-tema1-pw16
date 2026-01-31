@@ -1,5 +1,3 @@
-# CloudFront Distribution
-
 # Origin Access Control
 resource "aws_cloudfront_origin_access_control" "frontend" {
   name                              = "${var.project_name}-${var.environment}-frontend-oac"

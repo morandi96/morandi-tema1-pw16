@@ -82,14 +82,12 @@ const RESERVATION_CATEGORIES = computed(() => [
   }
 ]);
 
-// Validazione form
 const isFormValid = computed(() => {
   return (
     formData.value.doctor && formData.value.category && formData.value.date && formData.value.time
   );
 });
 
-// Mutation per creare prenotazione
 const { mutate: createReservation, isPending: isSubmitting } = useCreateReservation();
 
 const handleDateSelection = (date: string) => {
@@ -146,7 +144,6 @@ const handleSubmit = () => {
   });
 };
 
-// Inizializza le date bloccate al mount
 onMounted(() => {
   blockedDates.value = commonBlockedDates(4);
 });

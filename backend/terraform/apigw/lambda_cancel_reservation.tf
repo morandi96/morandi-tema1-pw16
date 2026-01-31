@@ -1,6 +1,3 @@
-# Lambda: Cancel Reservation
-
-# Build TypeScript prima di creare lo zip
 resource "null_resource" "build_cancel_reservation" {
   triggers = {
     source_hash = filemd5("${path.module}/lambda/cancel_reservation/src/index.ts")

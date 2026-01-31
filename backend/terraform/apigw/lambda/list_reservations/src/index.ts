@@ -53,7 +53,6 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   console.log("Event:", JSON.stringify(event, null, 2));
 
-  // Handle OPTIONS for CORS preflight
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
@@ -63,7 +62,6 @@ export const handler = async (
   }
 
   try {
-    // Estrai l'ID utente Cognito dal token (sub claim)
     const authenticatedUserId = event.requestContext?.authorizer?.claims
       ?.sub as string | undefined;
 
@@ -78,7 +76,6 @@ export const handler = async (
       };
     }
 
-    // Parametri query string
     const queryParams = event.queryStringParameters || {};
 
     // Se userId viene passato, usalo (altrimenti usa l'utente autenticato)

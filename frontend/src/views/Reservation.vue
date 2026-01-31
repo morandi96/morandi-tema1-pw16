@@ -164,7 +164,3 @@ const newReservation = () => {
     </q-card>
   </div>
 </template>
-
-<style scoped>
-/* Stili personalizzati se necessari */
-</style>

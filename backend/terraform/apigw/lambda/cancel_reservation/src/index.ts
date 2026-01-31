@@ -17,7 +17,6 @@ const corsHeaders = {
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.log('Event:', JSON.stringify(event, null, 2));
 
-  // Handle OPTIONS for CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -27,7 +26,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   try {
-    // Estrai l'ID utente Cognito dal token (sub claim)
+    
     const userId = event.requestContext?.authorizer?.claims?.sub as string | undefined;
 
     if (!userId) {

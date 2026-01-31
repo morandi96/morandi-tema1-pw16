@@ -22,13 +22,11 @@ const { t } = useI18n();
 // Mutation per cancellare la prenotazione
 const { mutate: cancelReservation, isPending: isCancelling } = useCancelReservation();
 
-// Data selezionata per il calendario (convertita da ISO a formato QDate)
 const selectedDate = computed(() => {
   // Converte da YYYY-MM-DD (ISO) a YYYY/MM/DD (formato QDate)
   return props.reservation.date.replace(/-/g, '/');
 });
 
-// Funzione per ottenere il colore dello stato
 const getStatusColor = (status: ReservationStatusType) => {
   return RESERVATION_STATUS_COLORS[status] || 'grey';
 };
@@ -44,7 +42,6 @@ const formatDate = (dateString: string) => {
   });
 };
 
-// Gestisce la cancellazione della prenotazione
 const handleCancelReservation = () => {
   $q.dialog({
     title: 'Conferma cancellazione',

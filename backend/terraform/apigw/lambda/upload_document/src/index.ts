@@ -1,6 +1,10 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, UpdateCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  UpdateCommand,
+  GetCommand,
+} from "@aws-sdk/lib-dynamodb";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -8,10 +12,10 @@ const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.DYNAMODB_TABLE!;
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-  'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
-  'Content-Type': 'application/json'
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+  "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
+  "Content-Type": "application/json",
 };
 
 interface ReservationDocument {
@@ -21,32 +25,37 @@ interface ReservationDocument {
 }
 
 interface DocumentRequest {
-  action: 'upload' | 'delete';
+  action: "upload" | "delete";
   document?: ReservationDocument; // Optional per delete
-  documentType: 'user' | 'doctor';
+  documentType: "user" | "doctor";
 }
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  console.log('Event:', JSON.stringify(event, null, 2));
+export const handler = async (
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> => {
+  console.log("Event:", JSON.stringify(event, null, 2));
 
-  // Handle OPTIONS for CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
+  if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: ''
+      body: "",
     };
   }
 
   try {
-    // Estrai l'ID utente Cognito dal token (sub claim)
-    const userId = event.requestContext?.authorizer?.claims?.sub as string | undefined;
+    const userId = event.requestContext?.authorizer?.claims?.sub as
+      | string
+      | undefined;
 
     if (!userId) {
       return {
         statusCode: 401,
         headers: corsHeaders,
-        body: JSON.stringify({ message: 'Utente non autenticato', code: 'UNAUTHORIZED' })
+        body: JSON.stringify({
+          message: "Utente non autenticato",
+          code: "UNAUTHORIZED",
+        }),
       };
     }
 
@@ -58,37 +67,36 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
-          message: 'ID prenotazione mancante',
-          code: 'MISSING_RESERVATION_ID'
-        })
+          message: "ID prenotazione mancante",
+          code: "MISSING_RESERVATION_ID",
+        }),
       };
     }
 
-    // Parse del body
     if (!event.body) {
       return {
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
-          message: 'Body mancante',
-          code: 'MISSING_BODY'
-        })
+          message: "Body mancante",
+          code: "MISSING_BODY",
+        }),
       };
     }
 
     let requestBody: DocumentRequest;
     try {
       requestBody = JSON.parse(event.body);
-      console.log('Parsed request body:', JSON.stringify(requestBody, null, 2));
+      console.log("Parsed request body:", JSON.stringify(requestBody, null, 2));
     } catch (parseError) {
-      console.error('Error parsing request body:', parseError);
+      console.error("Error parsing request body:", parseError);
       return {
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
-          message: 'Invalid JSON in request body',
-          code: 'INVALID_JSON'
-        })
+          message: "Invalid JSON in request body",
+          code: "INVALID_JSON",
+        }),
       };
     }
 
@@ -99,103 +107,119 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
-          message: 'Azione o tipo documento mancante',
-          code: 'MISSING_REQUIRED_DATA'
-        })
+          message: "Azione o tipo documento mancante",
+          code: "MISSING_REQUIRED_DATA",
+        }),
       };
     }
 
-    if (action !== 'upload' && action !== 'delete') {
+    if (action !== "upload" && action !== "delete") {
       return {
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
           message: 'Azione non valida. Usare "upload" o "delete"',
-          code: 'INVALID_ACTION'
-        })
+          code: "INVALID_ACTION",
+        }),
       };
     }
 
-    if (action === 'upload' && !document) {
+    if (action === "upload" && !document) {
       return {
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
-          message: 'Documento mancante per upload',
-          code: 'MISSING_DOCUMENT_FOR_UPLOAD'
-        })
+          message: "Documento mancante per upload",
+          code: "MISSING_DOCUMENT_FOR_UPLOAD",
+        }),
       };
     }
 
-    if (documentType !== 'user' && documentType !== 'doctor') {
+    if (documentType !== "user" && documentType !== "doctor") {
       return {
         statusCode: 400,
         headers: corsHeaders,
         body: JSON.stringify({
           message: 'Tipo documento non valido. Usare "user" o "doctor"',
-          code: 'INVALID_DOCUMENT_TYPE'
-        })
+          code: "INVALID_DOCUMENT_TYPE",
+        }),
       };
     }
 
-    console.log(`${action} documento per prenotazione:`, reservationId, 'tipo:', documentType);
+    console.log(
+      `${action} documento per prenotazione:`,
+      reservationId,
+      "tipo:",
+      documentType,
+    );
 
     // Verifica che la prenotazione esista e appartenga all'utente
-    const getResult = await docClient.send(new GetCommand({
-      TableName: TABLE_NAME,
-      Key: {
-        PK: `USER#${userId}`,
-        SK: `RESERVATION#${reservationId}`
-      }
-    }));
+    const getResult = await docClient.send(
+      new GetCommand({
+        TableName: TABLE_NAME,
+        Key: {
+          PK: `USER#${userId}`,
+          SK: `RESERVATION#${reservationId}`,
+        },
+      }),
+    );
 
     if (!getResult.Item) {
       return {
         statusCode: 404,
         headers: corsHeaders,
         body: JSON.stringify({
-          message: 'Prenotazione non trovata',
-          code: 'RESERVATION_NOT_FOUND'
-        })
+          message: "Prenotazione non trovata",
+          code: "RESERVATION_NOT_FOUND",
+        }),
       };
     }
 
     // Determina quale attributo aggiornare in base al tipo di documento
-    const attributeName = documentType === 'user' ? 'userDocument' : 'doctorDocument';
+    const attributeName =
+      documentType === "user" ? "userDocument" : "doctorDocument";
 
     let updateResult;
     let actionMessage;
 
-    if (action === 'upload') {
-      // Upload del documento
-      updateResult = await docClient.send(new UpdateCommand({
-        TableName: TABLE_NAME,
-        Key: {
-          PK: `USER#${userId}`,
-          SK: `RESERVATION#${reservationId}`
-        },
-        UpdateExpression: `SET ${attributeName} = :document`,
-        ExpressionAttributeValues: {
-          ':document': document
-        },
-        ReturnValues: 'ALL_NEW'
-      }));
-      actionMessage = 'Documento caricato con successo';
+    if (action === "upload") {
+      // Caricamento del documento
+      updateResult = await docClient.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            PK: `USER#${userId}`,
+            SK: `RESERVATION#${reservationId}`,
+          },
+          UpdateExpression: `SET ${attributeName} = :document`,
+          ExpressionAttributeValues: {
+            ":document": document,
+          },
+          ReturnValues: "ALL_NEW",
+        }),
+      );
+      actionMessage = "Documento caricato con successo";
     } else {
-      // Delete del documento - rimuove l'attributo
-      updateResult = await docClient.send(new UpdateCommand({
-        TableName: TABLE_NAME,
-        Key: {
-          PK: `USER#${userId}`,
-          SK: `RESERVATION#${reservationId}`
-        },
-        UpdateExpression: `REMOVE ${attributeName}`,
-        ReturnValues: 'ALL_NEW'
-      }));
-      actionMessage = 'Documento eliminato con successo';
+      // Cancellazione del documento - rimuove l'attributo
+      updateResult = await docClient.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            PK: `USER#${userId}`,
+            SK: `RESERVATION#${reservationId}`,
+          },
+          UpdateExpression: `REMOVE ${attributeName}`,
+          ReturnValues: "ALL_NEW",
+        }),
+      );
+      actionMessage = "Documento eliminato con successo";
     }
 
-    console.log(`${action} completato con successo:`, reservationId, attributeName);
+    console.log(
+      `${action} completato con successo:`,
+      reservationId,
+      attributeName,
+    );
 
     // Formatta la risposta con i dati della prenotazione aggiornata
     const updatedReservation = updateResult.Attributes;
@@ -214,20 +238,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           status: updatedReservation?.status,
           location: updatedReservation?.location,
           userDocument: updatedReservation?.userDocument,
-          doctorDocument: updatedReservation?.doctorDocument
-        }
-      })
+          doctorDocument: updatedReservation?.doctorDocument,
+        },
+      }),
     };
-
   } catch (error) {
-    console.error('Errore:', error);
+    console.error("Errore:", error);
     return {
       statusCode: 500,
       headers: corsHeaders,
       body: JSON.stringify({
-        message: 'Errore interno del server',
-        code: 'INTERNAL_ERROR'
-      })
+        message: "Errore interno del server",
+        code: "INTERNAL_ERROR",
+      }),
     };
   }
 };

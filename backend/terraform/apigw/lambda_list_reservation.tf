@@ -1,6 +1,3 @@
-# Lambda: List Reservations
-
-# Build TypeScript prima di creare lo zip
 resource "null_resource" "build_list_reservations" {
   triggers = {
     source_hash = filemd5("${path.module}/lambda/list_reservations/src/index.ts")

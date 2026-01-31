@@ -7,7 +7,6 @@ const router = useRouter();
 const route = useRoute();
 const { user, logout } = useAuth();
 
-// Tab attivo - sincronizzato con la rotta corrente
 const activeTab = ref('prenotazioni');
 
 // Sincronizza activeTab con la rotta corrente
