@@ -49,7 +49,7 @@ export const handler = async (
 
     // Parse del body
     const body: CreateReservationRequest = JSON.parse(event.body || "{}");
-    const { date, time, category, doctor, location, status } = body;
+    const { date, time, category, doctor, location, status, notes } = body;
 
     // Validazione campi obbligatori
     if (!date || !time || !category || !doctor) {
@@ -79,6 +79,7 @@ export const handler = async (
       doctor: doctor,
       status: status,
       location: location || null,
+      notes: notes || null,
       createdAt: createdAt,
     };
 
@@ -102,6 +103,7 @@ export const handler = async (
       doctor: doctor,
       status: "In attesa di conferma",
       location: location || null,
+      notes: notes || null,
       createdAt: createdAt,
     };
 

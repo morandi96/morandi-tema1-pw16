@@ -1,98 +1,101 @@
 {
   "common": {
-    "project": "Studio Medico Morandi"
+    "project": "Morandi Medical Clinic"
   },
   "layout": {
-    "no_data": "Nessuna prenotazione disponibile"
+    "no_data": "No reservations available"
   },
   "login": {
-    "verify": "Verifica accesso...",
-    "title": "Accedi o registrati per gestire le tue prenotazioni"
+    "verify": "Verifying access...",
+    "title": "Log in or sign up to manage your reservations"
   },
   "reservation": {
-    "reservationHistory": "Storico Prenotazioni",
-    "text": "Qui potrai prenotare le tue visite mediche",
-    "noReservation": "Non ci sono appuntamenti prenotati",
-    "activeReservation": "Prenotazione Attiva",
-    "address": "Indirizzo",
-    "reason": "Causale",
-    "loading": "Caricamento prenotazione attiva...",
-    "error": " Errore nel caricamento della prenotazione attiva",
-    "reserve": "Non ci sono appuntamenti prenotati",
-    "date": "Appuntamenti passati",
-    "load_history": "Caricamento storico...",
-    "history_error": "Errore nel caricamento dello storico prenotazioni",
+    "reservationHistory": "Reservation History",
+    "text": "Here you can book your medical appointments",
+    "noReservation": "There are no booked appointments",
+    "activeReservation": "Active Reservation",
+    "address": "Address",
+    "reason": "Reason",
+    "loading": "Loading active reservation...",
+    "error": "Error loading the active reservation",
+    "reserve": "There are no booked appointments",
+    "date": "Past appointments",
+    "load_history": "Loading history...",
+    "history_error": "Error loading reservation history",
     "new_reservation": {
-      "title": "Nuova Prenotazione",
-      "doctor_label": "Seleziona Medico",
-      "doctor_required": "Seleziona un medico",
-      "doctor_empty": "Nessun medico disponibile",
-      "category_label": "Categoria Visita",
-      "category_required": "Seleziona una categoria",
-      "category_empty": "Nessuna categoria disponibile",
-      "available_dates_label": "Date Disponibili",
-      "date_required": "Seleziona una data",
-      "date_empty": "Nessuna data disponibile",
-      "time_label": "Orario",
-      "time_required": "Seleziona un orario",
-      "time_empty": "Nessun orario disponibile",
-      "summary_title": "Riepilogo Prenotazione",
-      "summary_doctor": "Medico:",
-      "summary_category": "Categoria:",
-      "summary_date": "Data:",
-      "summary_time": "Orario:",
-      "cancel_button": "Annulla",
-      "confirm_button": "Conferma Prenotazione",
-      "submitting": "Prenotando...",
-      "success": "Prenotazione creata con successo",
-      "error": "Errore durante la creazione della prenotazione"
+      "title": "New Reservation",
+      "doctor_label": "Select Doctor",
+      "doctor_required": "Please select a doctor",
+      "doctor_empty": "No doctors available",
+      "category_label": "Visit Category",
+      "category_required": "Please select a category",
+      "category_empty": "No categories available",
+      "available_dates_label": "Available Dates",
+      "date_required": "Please select a date",
+      "date_empty": "No dates available",
+      "time_label": "Time",
+      "time_required": "Please select a time",
+      "time_empty": "No time slots available",
+      "notes_label": "Notes (optional)",
+      "notes_hint": "Add any notes or additional information for the doctor",
+      "summary_title": "Reservation Summary",
+      "summary_doctor": "Doctor:",
+      "summary_category": "Category:",
+      "summary_date": "Date:",
+      "summary_time": "Time:",
+      "summary_notes": "Notes:",
+      "cancel_button": "Cancel",
+      "confirm_button": "Confirm Reservation",
+      "submitting": "Booking...",
+      "success": "Reservation created successfully",
+      "error": "Error while creating the reservation"
     },
     "categories": {
-      "general_checkup": "Controllo generale",
-      "bone_problems": "Problemi ossei",
-      "respiratory_problems": "Problemi respiratori",
-      "cardiology_checkup": "Controllo cardiologico",
-      "dermatology_problems": "Problemi dermatologici",
-      "ophthalmology_checkup": "Controllo oculistico",
-      "gynecology_checkup": "Controllo ginecologico",
-      "gastrointestinal_problems": "Problemi gastrointestinali"
+      "general_checkup": "General check-up",
+      "bone_problems": "Bone problems",
+      "respiratory_problems": "Respiratory problems",
+      "cardiology_checkup": "Cardiology check-up",
+      "dermatology_problems": "Dermatological problems",
+      "ophthalmology_checkup": "Ophthalmology check-up",
+      "gynecology_checkup": "Gynecology check-up",
+      "gastrointestinal_problems": "Gastrointestinal problems"
     }
   },
   "document": {
-    "preview": "Anteprima",
-    "download": "Scarica",
-    "delete": "Elimina"
+    "preview": "Preview",
+    "download": "Download",
+    "delete": "Delete"
   },
   "report": {
-    "title": "Referti",
-    "subtitle": "Qui potrai consultare e caricare i tuoi referti medici",
-    "table_title": "Visite Completate",
-    "loading": "Caricamento referti...",
-    "error": "Errore nel caricamento dei referti",
-    "no_data": "Nessuna visita completata",
-    "download_prescription": "Scarica ricetta medica",
-    "upload_prescription": "Carica ricetta medica",
-    "download_report": "Scarica referto",
-    "upload_report": "Carica referto",
-    "no_document": "Non caricato"
+    "title": "Medical Reports",
+    "subtitle": "Here you can view and upload your medical reports",
+    "table_title": "Completed Visits",
+    "loading": "Loading reports...",
+    "error": "Error loading reports",
+    "no_data": "No completed visits",
+    "download_prescription": "Download medical prescription",
+    "upload_prescription": "Upload medical prescription",
+    "download_report": "Download report",
+    "upload_report": "Upload report",
+    "no_document": "Not uploaded"
   },
   "toast": {
     "reservation": {
       "create": {
-        "success": "Prenotazione creata con successo",
-        "error": "Errore durante la creazione della prenotazione"
+        "success": "Reservation created successfully",
+        "error": "Error while creating the reservation"
       },
       "cancel": {
-        "success": "Prenotazione cancellata con successo",
-        "error": "Errore durante la cancellazione della prenotazione"
+        "success": "Reservation canceled successfully",
+        "error": "Error while canceling the reservation"
       }
     },
     "report": {
       "upload": {
-        "success": "Documento caricato con successo",
-        "error": "Errore durante il caricamento del documento"
+        "success": "Document uploaded successfully",
+        "error": "Error while uploading the document"
       },
-      "file_too_large": "Il file supera la dimensione massima di 5MB"
+      "file_too_large": "The file exceeds the maximum size of 5MB"
     }
   }
 }

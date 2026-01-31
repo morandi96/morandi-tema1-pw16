@@ -1,11 +1,101 @@
 {
-  "TODO": {
-    "text": "Sistemare traduzioni"
+  "common": {
+    "project": "Studio Medico Morandi"
   },
-  "common": {},
+  "layout": {
+    "no_data": "Nessuna prenotazione disponibile"
+  },
+  "login": {
+    "verify": "Verifica accesso...",
+    "title": "Accedi o registrati per gestire le tue prenotazioni"
+  },
   "reservation": {
     "reservationHistory": "Storico Prenotazioni",
     "text": "Qui potrai prenotare le tue visite mediche",
-    "noReservation": "Non ci sono appuntamenti prenotati"
+    "noReservation": "Non ci sono appuntamenti prenotati",
+    "activeReservation": "Prenotazione Attiva",
+    "address": "Indirizzo",
+    "reason": "Causale",
+    "loading": "Caricamento prenotazione attiva...",
+    "error": " Errore nel caricamento della prenotazione attiva",
+    "reserve": "Non ci sono appuntamenti prenotati",
+    "date": "Appuntamenti passati",
+    "load_history": "Caricamento storico...",
+    "history_error": "Errore nel caricamento dello storico prenotazioni",
+    "new_reservation": {
+      "title": "Nuova Prenotazione",
+      "doctor_label": "Seleziona Medico",
+      "doctor_required": "Seleziona un medico",
+      "doctor_empty": "Nessun medico disponibile",
+      "category_label": "Categoria Visita",
+      "category_required": "Seleziona una categoria",
+      "category_empty": "Nessuna categoria disponibile",
+      "available_dates_label": "Date Disponibili",
+      "date_required": "Seleziona una data",
+      "date_empty": "Nessuna data disponibile",
+      "time_label": "Orario",
+      "time_required": "Seleziona un orario",
+      "time_empty": "Nessun orario disponibile",
+      "notes_label": "Note (opzionale)",
+      "notes_hint": "Aggiungi eventuali note o informazioni aggiuntive per il medico",
+      "summary_title": "Riepilogo Prenotazione",
+      "summary_doctor": "Medico:",
+      "summary_category": "Categoria:",
+      "summary_date": "Data:",
+      "summary_time": "Orario:",
+      "summary_notes": "Note:",
+      "cancel_button": "Annulla",
+      "confirm_button": "Conferma Prenotazione",
+      "submitting": "Prenotando...",
+      "success": "Prenotazione creata con successo",
+      "error": "Errore durante la creazione della prenotazione"
+    },
+    "categories": {
+      "general_checkup": "Controllo generale",
+      "bone_problems": "Problemi ossei",
+      "respiratory_problems": "Problemi respiratori",
+      "cardiology_checkup": "Controllo cardiologico",
+      "dermatology_problems": "Problemi dermatologici",
+      "ophthalmology_checkup": "Controllo oculistico",
+      "gynecology_checkup": "Controllo ginecologico",
+      "gastrointestinal_problems": "Problemi gastrointestinali"
+    }
+  },
+  "document": {
+    "preview": "Anteprima",
+    "download": "Scarica",
+    "delete": "Elimina"
+  },
+  "report": {
+    "title": "Referti",
+    "subtitle": "Qui potrai consultare e caricare i tuoi referti medici",
+    "table_title": "Visite Completate",
+    "loading": "Caricamento referti...",
+    "error": "Errore nel caricamento dei referti",
+    "no_data": "Nessuna visita completata",
+    "download_prescription": "Scarica ricetta medica",
+    "upload_prescription": "Carica ricetta medica",
+    "download_report": "Scarica referto",
+    "upload_report": "Carica referto",
+    "no_document": "Non caricato"
+  },
+  "toast": {
+    "reservation": {
+      "create": {
+        "success": "Prenotazione creata con successo",
+        "error": "Errore durante la creazione della prenotazione"
+      },
+      "cancel": {
+        "success": "Prenotazione cancellata con successo",
+        "error": "Errore durante la cancellazione della prenotazione"
+      }
+    },
+    "report": {
+      "upload": {
+        "success": "Documento caricato con successo",
+        "error": "Errore durante il caricamento del documento"
+      },
+      "file_too_large": "Il file supera la dimensione massima di 5MB"
+    }
   }
 }

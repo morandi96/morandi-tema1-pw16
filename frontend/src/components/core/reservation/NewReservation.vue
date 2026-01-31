@@ -28,7 +28,8 @@ const formData = ref({
   doctor: '',
   category: '',
   date: '',
-  time: ''
+  time: '',
+  notes: ''
 });
 
 const showDatePicker = ref(false);
@@ -102,7 +103,8 @@ const handleCloseDialog = () => {
     doctor: '',
     category: '',
     date: '',
-    time: ''
+    time: '',
+    notes: ''
   };
   emit('update:model', false);
 };
@@ -120,7 +122,8 @@ const handleSubmit = () => {
     time: formData.value.time,
     category: categoryLabel,
     doctor: formData.value.doctor,
-    status: ReservationStatus.IN_ATTESA
+    status: ReservationStatus.IN_ATTESA,
+    notes: formData.value.notes || undefined
   };
 
   createReservation(newReservation, {
@@ -326,6 +329,24 @@ onMounted(() => {
               </template>
             </q-select>
           </div>
+
+          <!-- Terza riga: Note -->
+          <div class="col-12">
+            <q-input
+              v-model="formData.notes"
+              :label="t('reservation.new_reservation.notes_label')"
+              filled
+              type="textarea"
+              rows="3"
+              counter
+              maxlength="500"
+              :hint="t('reservation.new_reservation.notes_hint')"
+            >
+              <template #prepend>
+                <q-icon name="description" />
+              </template>
+            </q-input>
+          </div>
         </div>
 
         <!-- Riepilogo prenotazione -->
@@ -363,6 +384,12 @@ onMounted(() => {
                   t('reservation.new_reservation.summary_time')
                 }}</span>
                 {{ formData.time }}
+              </div>
+              <div v-if="formData.notes">
+                <span class="text-weight-medium">{{
+                  t('reservation.new_reservation.summary_notes')
+                }}</span>
+                {{ formData.notes }}
               </div>
             </div>
           </q-card>

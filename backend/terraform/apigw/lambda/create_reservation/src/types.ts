@@ -5,6 +5,7 @@ export interface CreateReservationRequest {
   doctor: string;
   location?: string;
   status: string;
+  notes?: string;
 }
 
 export interface Reservation {
@@ -16,5 +17,6 @@ export interface Reservation {
   doctor: string;
   status: "In attesa di conferma" | "Confermata" | "Completata" | "Annullata";
   location: string | null;
+  notes: string | null;
   createdAt: string;
 }

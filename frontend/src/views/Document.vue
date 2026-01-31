@@ -24,7 +24,7 @@ const { reservationsList, isLoading, isError } = useReservationsList();
 
 // Mutation per upload e delete documento
 const { mutate: uploadDocument, isPending: isUploading } = useUploadDocument();
-const { mutate: deleteDocumentMutation, isPending: isDeleting } = useDeleteDocument();
+const { mutate: deleteDocumentMutation } = useDeleteDocument();
 
 // Computed per gestire i dati della tabella (solo prenotazioni completate)
 const tableData = computed(() => {
@@ -141,7 +141,7 @@ const deleteDocument = (reservationId: string, documentType: 'user' | 'doctor') 
   $q.dialog({
     title: 'Conferma eliminazione',
     ok: {
-      label: 'Cancella prenotazione',
+      label: 'Cancella documento',
       color: 'negative',
       unelevated: true
     },

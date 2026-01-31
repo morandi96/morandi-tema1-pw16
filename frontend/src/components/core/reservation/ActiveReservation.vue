@@ -45,7 +45,6 @@ const formatDate = (dateString: string) => {
 };
 
 // Gestisce la cancellazione della prenotazione
-// TODO: spostare traduzioni
 const handleCancelReservation = () => {
   $q.dialog({
     title: 'Conferma cancellazione',

@@ -1,6 +1,5 @@
 import Login from '@/views/Login.vue';
 import Reservation from '@/views/Reservation.vue';
-import Cancellation from '@/views/Cancellation.vue';
 import Document from '@/views/Document.vue';
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { getCurrentUser } from 'aws-amplify/auth';

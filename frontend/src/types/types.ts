@@ -16,6 +16,7 @@ export interface Reservation {
   doctor: string;
   status: ReservationStatusType;
   location?: string;
+  notes?: string;
   // Documento caricato dall'utente (referto)
   userDocument?: ReservationDocument;
   // Documento caricato dal medico (ricetta)
